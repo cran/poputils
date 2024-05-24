@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>poputils</title>
+
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">poputils</h1>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#aims" id="toc-aims"><span class="toc-section-number">1</span> Aims</a></li>
+<li><a href="#tools-for-data-analysts" id="toc-tools-for-data-analysts"><span class="toc-section-number">2</span> Tools for data analysts</a>
+<ul>
+<li><a href="#labels" id="toc-labels"><span class="toc-section-number">2.1</span> Labels</a></li>
+<li><a href="#life-tables-and-life-expectancy" id="toc-life-tables-and-life-expectancy"><span class="toc-section-number">2.2</span> Life tables and life expectancy</a></li>
+</ul></li>
+<li><a href="#tools-for-developers" id="toc-tools-for-developers"><span class="toc-section-number">3</span> Tools for developers</a>
+<ul>
+<li><a href="#labels-1" id="toc-labels-1"><span class="toc-section-number">3.1</span> Labels</a></li>
+<li><a href="#data-manipulation" id="toc-data-manipulation"><span class="toc-section-number">3.2</span> Data manipulation</a></li>
+</ul></li>
+<li><a href="#future-developments" id="toc-future-developments"><span class="toc-section-number">4</span> Future developments</a>
+<ul>
+<li><a href="#definite" id="toc-definite"><span class="toc-section-number">4.1</span> Definite</a></li>
+<li><a href="#possible" id="toc-possible"><span class="toc-section-number">4.2</span> Possible</a></li>
+</ul></li>
+<li><a href="#references" id="toc-references">References</a></li>
+</ul>
+</div>
+
+<div id="aims" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Aims</h1>
+<p><strong>poputils</strong> contains tools for carrying out common tasks when working with demographic data. Some distinctive features:</p>
+<ul>
+<li><strong>poputils</strong> tries to into <a href="https://www.tidyverse.org">tidyverse</a> workflows. For instance, <strong>poputils</strong> functions use data frames for inputs and outputs, use <a href="https://tidyselect.r-lib.org/reference/language.html">tidyselect</a> methods to specify variables, and follow tidyverse conventions for variable names.</li>
+<li><strong>poputils</strong> allows for uncertainty through the use of <a href="https://bayesiandemography.github.io/rvec/reference/rvec.html">rvecs</a>. An rvec is an object holding multiple draws from a distribution that behaves similarly to an ordinary R vector.</li>
+<li>Allow users to work directly with age and time labels, based on common set of methods.</li>
+</ul>
+<p>Some functions in <strong>poputils</strong> are designed for data analysts working on demographic datasets. Others are designed for programmers creating functions to be used at data analysts.</p>
+</div>
+<div id="tools-for-data-analysts" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Tools for data analysts</h1>
+<div id="labels" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Labels</h2>
+<div id="age" class="section level3" number="2.1.1">
+<h3><span class="header-section-number">2.1.1</span> Age</h3>
+<p>Producers of demographic data follow a wide variety of styles for labeling age groups. <strong>poputils</strong> contains tools for parsing and manipulating age group labels.</p>
+<p>Age label functions in <strong>poputils</strong> require that age labels belong to one of three types:</p>
+<ul>
+<li><code>&quot;single&quot;</code>. Single years of age, possibly including an open age group, eg <code>&quot;0&quot;,</code>“81”<code>,</code>“17”<code>,</code>“100+”`.</li>
+<li><code>&quot;five&quot;</code>. Five-year age groups, possibly including an open age group, eg <code>&quot;0-4&quot;</code>, <code>&quot;80-84&quot;</code>, <code>&quot;15-19&quot;</code>, <code>&quot;100+&quot;</code>.</li>
+<li><code>&quot;lt&quot;</code>. Life table age groups. Like <code>&quot;five&quot;</code>, but with the <code>&quot;0-4&quot;</code> age group split into <code>&quot;0&quot;</code> and <code>&quot;1-4&quot;</code>.</li>
+</ul>
+<p>Age labels created by <strong>poputils</strong> functions such as <code>age_labels()</code> follow a standard set of rules. Many age labels created using other rules can, however, be parsed by <strong>poputils</strong> functions,</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(poputils)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr, <span class="at">warn.conflicts =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">original =</span> <span class="fu">c</span>(<span class="st">&quot;5 to 9&quot;</span>, <span class="st">&quot;5_9&quot;</span>, <span class="st">&quot;05-09&quot;</span>),</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>       <span class="at">reformated =</span> <span class="fu">reformat_age</span>(original))</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 2</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt;   original reformated</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;    &lt;fct&gt;     </span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; 1 5 to 9   5-9       </span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; 2 5_9      5-9       </span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; 3 05-09    5-9</span></span></code></pre></div>
+<p>Functions <code>age_lower()</code>, <code>age_upper()</code>, and <code>age_mid()</code> extract information about lower limits, upper limits, and centers of age groups. This can be useful for ordering data</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">age =</span> <span class="fu">c</span>(<span class="st">&quot;5-9&quot;</span>, <span class="st">&quot;0-4&quot;</span>, <span class="st">&quot;15-19&quot;</span>, <span class="st">&quot;10-14&quot;</span>),</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>                 <span class="at">population =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">7</span>, <span class="dv">2</span>, <span class="dv">4</span>))</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>df</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt;     age population</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; 1   5-9          3</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; 2   0-4          7</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; 3 15-19          2</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; 4 10-14          4</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>df <span class="sc">|&gt;</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">age_lower</span>(age))</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt;     age population</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt; 1   0-4          7</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; 2   5-9          3</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt; 3 10-14          4</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; 4 15-19          2</span></span></code></pre></div>
+<p>and plotting</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">age_mid</span>(age), <span class="at">y =</span> population)) <span class="sc">+</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code></pre></div>
+<p><img src="data:image/png;base64,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p1RAqVNWlJQE0o6A5wsR045YlAwVL15c7fYvWbJklJCZ/Rhbc5ymHTKbRuTcowsGVunqOAaUriXLfJFAChBgFywFCokikkC6EmAXLIElu3PnTvn++++DMZYuXVpt3At6ZPgFLGGuX79eGjVqlIvEl19+KTt27JB69erlMVSXK2CG3GzZskXtNq9cuXIwx7C/7DTuVbVqVYFZjFR3VEAJLMG///3vsnfvXoGRNDjs9sfOYToRmOJ9+umnlWU/pwJ64YUXZNOmTYrTiy++KGPHjpWKFStmLDIc3IApd5iusRUQTJ/26dNHrr322iCXTp06UQEFafBCEdi2bZsMHz48oz+gcFXhm2++kX79+kmJEiXUPzvMt99+qywlzJw5Uymmt956S9544w35y1/+YgfJqF+cHjN58uRcjAAAnCpUqKDqVroB4RhQgkoUMzqHDh1S5ilff/11ZbQpQVGnfDRgAzO8v//973PlBYoJrUTb3jG6YP/5z39yhcmkG5iE/cc//qFag7Z9auQff9iggBYsWCBQUuk0e0gFlKAa/vXXX6s++sqVK9UCux49esi8efMSFHtqR1OrVi11pEtoLmD3G60i22EJA86eylTXrFkzwbghnHMh69atWwXjZMeOHVO/OJvrwIEDaYGJY0AJKkYYXps1a5bY639gQ3fSpEnSqlWrBKWQftHgyCbnamiMdaAVQJebAM7Twz8ciwOHwWi0hjAOlOqOLaAElSBOwXCaqcRAKgako52LlKDkUzKasmXLqm6rLTy6sJdeeql9y9//Efjuu+9yzYChbumeGmM6RCqgBJXQkSNHpGfPnuroEjSf586dK40bNw6ObyQombSKBke9bNy4UXbt2iVo/eCAu+uvvz6t8piIzCxbtkwmTJigosL4D46w0j24MxHpexkHu2AJovvLX/5S7YL/05/+pD4mjGfgCCK6yATACLy6dOmippQrVaokd911V+QXMvRJhw4d1AzYH/7wBzXJceutt6o1U+mAg1sxElyK6HJhwR0+Ljo9Aj/99JPqYhQtWlTvhQwNhdYPxs1MPAk4v0VCBZRfcnyPBEggbgIcA4obISMgARLILwEqoPyS43skQAJxE6ACihshIyABEsgvASqg/JLjeyRAAnEToAKKGyEjyC+BL774Qp577rmIr2Mh58CBA9WsojPQX//6V9/22k2cOFE+/fRT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" /><!-- --></p>
+<p>among other things.</p>
+<p>Functions <code>combine_age()</code> and <code>set_age_open()</code> can be used to collapse age groups,</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">age =</span> <span class="fu">age_labels</span>(<span class="st">&quot;lt&quot;</span>, <span class="at">max =</span> <span class="dv">30</span>),</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>       <span class="at">age_5 =</span> <span class="fu">combine_age</span>(age, <span class="at">to =</span> <span class="st">&quot;five&quot;</span>),</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>       <span class="at">age_25plus =</span> <span class="fu">set_age_open</span>(age, <span class="at">lower =</span> <span class="dv">20</span>))</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; # A tibble: 8 × 3</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt;   age   age_5 age_25plus</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;     </span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; 1 0     0-4   0         </span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; 2 1-4   0-4   1-4       </span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; 3 5-9   5-9   5-9       </span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; 4 10-14 10-14 10-14     </span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; 5 15-19 15-19 15-19     </span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; 6 20-24 20-24 20+       </span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; 7 25-29 25-29 20+       </span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; 8 30+   30+   20+</span></span></code></pre></div>
+<p>The aim is that users should be able to with age group labels throughout the analysis.</p>
+</div>
+<div id="sexgender" class="section level3" number="2.1.2">
+<h3><span class="header-section-number">2.1.2</span> Sex/gender</h3>
+<p>Function <code>reformat_sex()</code> converts sex/gender categories to <code>&quot;Female&quot;</code>, <code>&quot;Male&quot;</code>, and any additional categories specified through the <code>except</code> argument,</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">reformat_sex</span>(<span class="fu">c</span>(<span class="st">&quot;M&quot;</span>, <span class="st">&quot;F&quot;</span>, <span class="st">&quot;Diverse&quot;</span>, <span class="st">&quot;Fem&quot;</span>), <span class="at">except =</span> <span class="st">&quot;Diverse&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; [1] Male    Female  Diverse Female </span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; Levels: Female Male Diverse</span></span></code></pre></div>
+</div>
+</div>
+<div id="life-tables-and-life-expectancy" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Life tables and life expectancy</h2>
+<p>A life table a way of summarizing mortality conditions. It consists of quantities calculated from age-specific mortality rates. The most widely-used life table quantity is life expectancy at birth.</p>
+<div id="basic-functionality" class="section level3" number="2.2.1">
+<h3><span class="header-section-number">2.2.1</span> Basic functionality</h3>
+<p>Life tables can be calculated from age-specific mortality rates using function <code>lifetab()</code>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>nzmort <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">2022</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>         gender <span class="sc">==</span> <span class="st">&quot;Female&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="fu">lifetab</span>(<span class="at">mx =</span> mx)  </span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; # A tibble: 21 × 11</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt;     year gender age      deaths   popn      mx      qx     lx    dx     Lx    ex</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt;    &lt;int&gt; &lt;chr&gt;  &lt;fct&gt;     &lt;int&gt;  &lt;int&gt;   &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt;  1  2022 Female Infant       84  29680 2.83e-3 2.83e-3 1   e5 283.  9.99e4  83.4</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt;  2  2022 Female 1-4 yea…     18 118420 1.52e-4 6.08e-4 9.97e4  60.6 3.99e5  82.6</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt;  3  2022 Female 5-9 yea…     12 156820 7.65e-5 3.83e-4 9.97e4  38.1 4.98e5  78.7</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt;  4  2022 Female 10-14 y…     15 164830 9.10e-5 4.55e-4 9.96e4  45.3 4.98e5  73.7</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt;  5  2022 Female 15-19 y…     42 154150 2.72e-4 1.36e-3 9.96e4 136.  4.98e5  68.8</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt;  6  2022 Female 20-24 y…     63 156860 4.02e-4 2.01e-3 9.94e4 199.  4.97e5  63.8</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt;  7  2022 Female 25-29 y…     72 172770 4.17e-4 2.08e-3 9.92e4 207.  4.96e5  59.0</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt;  8  2022 Female 30-34 y…     78 194570 4.01e-4 2.00e-3 9.90e4 198.  4.95e5  54.1</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt;  9  2022 Female 35-39 y…    111 175050 6.34e-4 3.17e-3 9.88e4 313.  4.93e5  49.2</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; 10  2022 Female 40-44 y…    147 160070 9.18e-4 4.58e-3 9.85e4 451.  4.91e5  44.3</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; # ℹ 11 more rows</span></span></code></pre></div>
+<p><code>lifetab()</code> and <code>lifeexp()</code> both have a <code>by</code> argument. Separate results are calculated for each combination of the <code>by</code> variables,</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>nzmort <span class="sc">|&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="fu">lifeexp</span>(<span class="at">mx =</span> mx,</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>          <span class="at">by =</span> <span class="fu">c</span>(gender, year))  </span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; # A tibble: 4 × 3</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt;   gender  year    ex</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;  &lt;int&gt; &lt;dbl&gt;</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; 1 Female  2021  84.0</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; 2 Male    2021  80.5</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; 3 Female  2022  83.4</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; 4 Male    2022  80.0</span></span></code></pre></div>
+<p>The same effect can be obtained using <code>dplyr::group_by()</code>,</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>nzmort <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="fu">group_by</span>(gender, year) <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="fu">lifeexp</span>(<span class="at">mx =</span> mx)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; # A tibble: 4 × 3</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt;   gender  year    ex</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;  &lt;int&gt; &lt;dbl&gt;</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; 1 Female  2021  84.0</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; 2 Male    2021  80.5</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; 3 Female  2022  83.4</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; 4 Male    2022  80.0</span></span></code></pre></div>
+<p>The input data for life tables and life expectancies can be probabilities of dying (<code>qx</code>), rather than mortality rates (<code>mx</code>)</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>west_lifetab <span class="sc">|&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="fu">group_by</span>(level, sex) <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="fu">lifeexp</span>(<span class="at">qx =</span> qx)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt; # A tibble: 50 × 3</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt;    level sex       ex</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt;    &lt;int&gt; &lt;chr&gt;  &lt;dbl&gt;</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt;  1     1 Female  20.1</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt;  2     1 Male    18.1</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt;  3     2 Female  22.5</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt;  4     2 Male    20.5</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt;  5     3 Female  25.0</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt;  6     3 Male    22.9</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt;  7     4 Female  27.5</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt;  8     4 Male    25.3</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt;  9     5 Female  30.0</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; 10     5 Male    27.7</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; # ℹ 40 more rows</span></span></code></pre></div>
+</div>
+<div id="calculation-methods" class="section level3" number="2.2.2">
+<h3><span class="header-section-number">2.2.2</span> Calculation methods</h3>
+<p>Alternative methods for calculating life tables differ mainly in their assumptions variation within age groups <span class="citation">(Preston, Heuveline, and Guillot 2001; Keyfitz and Caswell 2005)</span>. It turns out that, for the purposes of constructing life tables, all the relevant information about the way that mortality varies by age within each age group can be captured by a single number: the average length of time lived in an interval by people who die in that interval <span class="citation">(Preston, Heuveline, and Guillot 2001, 43)</span>. This number is denoted <span class="math inline">\(_na_x\)</span>, where <span class="math inline">\(x\)</span> is exact age at the start of the internal, and <span class="math inline">\(n\)</span> is the length of the interval. The quantity <span class="math inline">\(_5a_{20}\)</span>, for instance, refers to the average number of years lived after their 20th birthday by people who die between their 20th and 25th birthdays. When <span class="math inline">\(n=1\)</span>, the <span class="math inline">\(n\)</span> subscript is typically omitted.</p>
+<p>Functions <code>lifetab()</code> and <code>lifeexp()</code> have four arguments for specifying calculation methods:</p>
+<ul>
+<li><code>infant</code>, which specifies how <span class="math inline">\(a_0\)</span> is calculated,</li>
+<li><code>child</code>, which specifies how <span class="math inline">\(_4a_1\)</span> is calculated,</li>
+<li><code>closed</code>, which specifies how <span class="math inline">\(_na_x\)</span> for all other closed intervals are calculated, and</li>
+<li><code>open</code>, which specifies how the final interval, <span class="math inline">\(_{\infty}a_x\)</span> is calculated.</li>
+</ul>
+<p>Different choices of method are available for each argument. In some cases, different formulas are used for females and males. The formulas can also differ depending on whether the input data is of mortality rates or probabilities of dying.</p>
+<table>
+<colgroup>
+<col width="8%" />
+<col width="8%" />
+<col width="14%" />
+<col width="7%" />
+<col width="62%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left"><code>argument</code></th>
+<th align="left"><code>sex</code></th>
+<th align="left"><code>method</code></th>
+<th align="center">input</th>
+<th align="center">formula</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>infant</code></td>
+<td align="left">&lt;any&gt;</td>
+<td align="left"><code>&quot;constant&quot;</code></td>
+<td align="center"><code>mx</code></td>
+<td align="center"><span class="math display">\[a_0 = \frac{1 - (m_0 + 1) e^{-m_0}}{m_0 (1 - e^{-m_0})}\]</span></td>
+</tr>
+<tr class="even">
+<td align="left"><code>infant</code></td>
+<td align="left">&lt;any&gt;</td>
+<td align="left"><code>&quot;constant&quot;</code></td>
+<td align="center"><code>qx</code></td>
+<td align="center"><span class="math display">\[a_0 = \frac{(1 - \log(1 - q_0) (1 - q_0)) - 1}{\log(1 - q_0) q_0}\]</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><code>infant</code></td>
+<td align="left">&lt;any&gt;</td>
+<td align="left"><code>&quot;linear&quot;</code></td>
+<td align="center"><code>mx</code></td>
+<td align="center"><span class="math display">\[a_0 = 0.5\]</span></td>
+</tr>
+<tr class="even">
+<td align="left"><code>infant</code></td>
+<td align="left">&lt;any&gt;</td>
+<td align="left"><code>&quot;linear&quot;</code></td>
+<td align="center"><code>qx</code></td>
+<td align="center"><span class="math display">\[a_0 = 0.5\]</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><code>infant</code></td>
+<td align="left">Female</td>
+<td align="left"><code>&quot;CD&quot;</code></td>
+<td align="center"><code>mx</code></td>
+<td align="center"><span class="math display">\[a_0 = \begin{cases} 0.053 + 2.8 m_0 &amp; 0 \le m_0 &lt; 0.107 \\ 0.35 &amp;  m_0 \ge 0.107 \end{cases}\]</span></td>
+</tr>
+<tr class="even">
+<td align="left"><code>infant</code></td>
+<td align="left">Female</td>
+<td align="left"><code>&quot;CD&quot;</code></td>
+<td align="center"><code>qx</code></td>
+<td align="center"><span class="math display">\[a_0 = \begin{cases} 0.05 + 3 q_0 &amp; 0 \le m_0 &lt; 0.1 \\ 0.35 &amp;  q_0 \ge 0.1 \end{cases}\]</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><code>infant</code></td>
+<td align="left">Male</td>
+<td align="left"><code>&quot;CD&quot;</code></td>
+<td align="center"><code>mx</code></td>
+<td align="center"><span class="math display">\[a_0 = \begin{cases} 0.045 + 2.684 m_0 &amp; 0 \le m_0 &lt; 0.107 \\ b0.33 &amp;  m_0 \ge 0.107 \end{cases}\]</span></td>
+</tr>
+<tr class="even">
+<td align="left"><code>infant</code></td>
+<td align="left">Male</td>
+<td align="left"><code>&quot;CD&quot;</code></td>
+<td align="center"><code>qx</code></td>
+<td align="center"><span class="math display">\[a_0 = \begin{cases} 0.0425 + 2.875 q_0 &amp; 0 \le q_0 &lt; 0.1 \\ 0.33 &amp;     q_0 \ge 0.1 \end{cases}\]</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><code>infant</code></td>
+<td align="left">Female</td>
+<td align="left"><code>&quot;AK&quot;</code></td>
+<td align="center"><code>mx</code></td>
+<td align="center"><span class="math display">\[a_0 = \begin{cases} 0.14903 - 2.05527 m_0 &amp; 0 \le m_0 &lt; 0.01724 \\ 0.04667 + 3.88089 m_0 &amp; 0.01724 \le m_0 &lt; 0.06891 \\ 0.31411 &amp;  m_0 \ge 0.06891 \end{cases}\]</span></td>
+</tr>
+<tr class="even">
+<td align="left"><code>infant</code></td>
+<td align="left">Female</td>
+<td align="left"><code>&quot;AK&quot;</code></td>
+<td align="center"><code>qx</code></td>
+<td align="center"><span class="math display">\[a_0 = \begin{cases} 0.149 - 2.0867 q_0 &amp; 0 \le q_0 &lt; 0.017 \\ 0.0438 + 4.1075 q_0 &amp; 0.017 \le q_0 &lt; 0.0658 \\ 0.3141 &amp;  q_0 \ge 0.0658 \end{cases}\]</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><code>infant</code></td>
+<td align="left">Male</td>
+<td align="left"><code>&quot;AK&quot;</code></td>
+<td align="center"><code>mx</code></td>
+<td align="center"><span class="math display">\[a_0 = \begin{cases} 0.14929 - 1.99545 m_0 &amp; 0 \le m_0 &lt;  0.023 \\ 0.02832 + 3.26021 m_0 &amp;  0.023 \le m_0 &lt; 0.08307 \\ 0.29915 &amp;  m_0 \ge 0.08307 \end{cases}\]</span></td>
+</tr>
+<tr class="even">
+<td align="left"><code>infant</code></td>
+<td align="left">Male</td>
+<td align="left"><code>&quot;AK&quot;</code></td>
+<td align="center"><code>qx</code></td>
+<td align="center"><span class="math display">\[a_0 = \begin{cases} 0.1493 - 2.0367 q_0 &amp; 0 \le q_0 &lt;  0.0226 \\ 0.0244 + 3.4994 q_0 &amp;  0.0226 \le q_0 &lt; 0.0785 \\ 0.2991 &amp;  q_0 \ge 0.0785 \end{cases}\]</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><code>child</code></td>
+<td align="left">&lt;any&gt;</td>
+<td align="left"><code>&quot;constant&quot;</code></td>
+<td align="center"><code>mx</code></td>
+<td align="center"><span class="math display">\[_4a_1 = \frac{1 - (4 \times {_4}m_1 + 1) e^{-4 \times {_4}m_1}}{_4m_1 (1 - e^{-4 \times {_4}m_1})}\]</span></td>
+</tr>
+<tr class="even">
+<td align="left"><code>child</code></td>
+<td align="left">&lt;any&gt;</td>
+<td align="left"><code>&quot;constant&quot;</code></td>
+<td align="center"><code>qx</code></td>
+<td align="center"><span class="math display">\[_4a_1 = \frac{4((1 - \log(1-{_4}q_1)) (1 - {_4}m_1) - 1)}{\log(1 - {_4q_1}) {_4}q_1}\]</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><code>child</code></td>
+<td align="left">&lt;any&gt;</td>
+<td align="left"><code>&quot;linear&quot;</code></td>
+<td align="center"><code>mx</code></td>
+<td align="center"><span class="math display">\[_4a_1 = 2\]</span></td>
+</tr>
+<tr class="even">
+<td align="left"><code>child</code></td>
+<td align="left">&lt;any&gt;</td>
+<td align="left"><code>&quot;linear&quot;</code></td>
+<td align="center"><code>qx</code></td>
+<td align="center"><span class="math display">\[_4a_1 = 2\]</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><code>child</code></td>
+<td align="left">Female</td>
+<td align="left"><code>&quot;CD&quot;</code></td>
+<td align="center"><code>mx</code></td>
+<td align="center"><span class="math display">\[_4a_1 = \begin{cases} 1.522 - 1.518 m_0 &amp; 0 \le m_0 &lt; 0.107 \\ 1.361 &amp;  m_0 \ge 0.107 \end{cases}\]</span></td>
+</tr>
+<tr class="even">
+<td align="left"><code>child</code></td>
+<td align="left">Female</td>
+<td align="left"><code>&quot;CD&quot;</code></td>
+<td align="center"><code>qx</code></td>
+<td align="center"><span class="math display">\[_4a_1 = \begin{cases} 1.542 - 1.625 q_0 &amp; 0 \le q_0 &lt; 0.1 \\ 1.361 &amp;  q_0 \ge 0.1 \end{cases}\]</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><code>child</code></td>
+<td align="left">Male</td>
+<td align="left"><code>&quot;CD&quot;</code></td>
+<td align="center"><code>mx</code></td>
+<td align="center"><span class="math display">\[_4a_1 = \begin{cases} 1.651 - 2.816 m_0 &amp; 0 \le m_0 &lt; 0.107 \\ 1.352 &amp;  m_0 \ge 0.107 \end{cases}\]</span></td>
+</tr>
+<tr class="even">
+<td align="left"><code>child</code></td>
+<td align="left">Male</td>
+<td align="left"><code>&quot;CD&quot;</code></td>
+<td align="center"><code>qx</code></td>
+<td align="center"><span class="math display">\[_4a_1 = \begin{cases} 1.653 - 3.013 q_0 &amp; 0 \le q_0 &lt; 0.1 \\ 1.352 &amp;  q_0 \ge 0.1 \end{cases}\]</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><code>closed</code></td>
+<td align="left">&lt;any&gt;</td>
+<td align="left"><code>&quot;constant&quot;</code></td>
+<td align="center"><code>mx</code></td>
+<td align="center"><span class="math display">\[_na_x = \frac{1 - (n \times {_n}m_x + 1) e^{-n \times {_n}m_x}}{_nm_x (1 - e^{-n \times {_n}m_x})}\]</span></td>
+</tr>
+<tr class="even">
+<td align="left"><code>closed</code></td>
+<td align="left">&lt;any&gt;</td>
+<td align="left"><code>&quot;constant&quot;</code></td>
+<td align="center"><code>qx</code></td>
+<td align="center"><span class="math display">\[_na_x = \frac{n((1 - \log(1 - {_n}q_x))(1 - {_nq_x}) - 1)}{\log(1 - {_nq_x}) {_n}q_x}\]</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><code>closed</code></td>
+<td align="left">&lt;any&gt;</td>
+<td align="left"><code>&quot;linear&quot;</code></td>
+<td align="center"><code>mx</code></td>
+<td align="center"><span class="math display">\[_na_x = 0.5 n\]</span></td>
+</tr>
+<tr class="even">
+<td align="left"><code>closed</code></td>
+<td align="left">&lt;any&gt;</td>
+<td align="left"><code>&quot;linear&quot;</code></td>
+<td align="center"><code>qx</code></td>
+<td align="center"><span class="math display">\[_na_x = 0.5 n\]</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><code>open</code></td>
+<td align="left">&lt;any&gt;</td>
+<td align="left"><code>&quot;constant&quot;</code></td>
+<td align="center"><code>mx</code></td>
+<td align="center"><span class="math display">\[_{\infty}a_{\omega} = \frac{1}{_{\infty}m_{\omega}}\]</span></td>
+</tr>
+<tr class="even">
+<td align="left"><code>open</code></td>
+<td align="left">&lt;any&gt;</td>
+<td align="left"><code>&quot;constant&quot;</code></td>
+<td align="center"><code>qx</code></td>
+<td align="center"><span class="math display">\[_{\infty}a_{\omega} = \frac{1}{_{n}m_{\omega-n}}\]</span></td>
+</tr>
+</tbody>
+</table>
+<p>In the table above, the values for <code>&quot;CD&quot;</code> are from <span class="citation">Coale, Demeny, and Vaughan (1983)</span>, p20, and <span class="citation">Preston, Heuveline, and Guillot (2001)</span>, p48; the values for <code>&quot;AK&quot;</code> are from <span class="citation">Andreev and Kingkade (2015)</span>, p376, and <span class="citation">Wilmoth et al. (2021)</span>, p37; and the values for <code>&quot;constant&quot;</code> are expected values for an exponential distribution that has been right-truncated at <span class="math inline">\(n\)</span>.</p>
+<p>When the inputs data are <span class="math inline">\(_nq_x\)</span>, the value of <span class="math inline">\(_na_x\)</span> for the last age group is based in mortality rates in the second-to-last age group. This is an expedient to deal with the fact that <span class="math inline">\(_nq_x\)</span> is always 1 in the last age group, and therefore provides no information about mortality conditions in that age group.</p>
+<p>Once the <span class="math inline">\(_na_x\)</span> have been determined, the life table is fully specified, and the required calculations can be carried out with no further input from the user.</p>
+<p>The probability of dying within each interval is</p>
+<p><span class="math display">\[_nq_x = \frac{n \times {_n}m_x}{1 + (n -  {_n}a_x) \times {_nm_x}},\]</span>
+with <span class="math inline">\(_{\infty}q_{\omega} = 1\)</span>. Quantity <span class="math inline">\(l_x\)</span> is the number of people surviving to exact age <span class="math inline">\(x\)</span>. In <code>lifetab()</code>, by default, <span class="math inline">\(l_0 = 100,000\)</span>. Remaining values are calculated using</p>
+<p><span class="math display">\[l_{x+n} = (1 - {_nq_x}) \times l_x.\]</span>
+Quantity <span class="math inline">\(_nd_x\)</span> is the number of people who die between exact ages <span class="math inline">\(x\)</span> and <span class="math inline">\(x+n\)</span>,</p>
+<p><span class="math display">\[_nd_x = l_x - l_{x+n}.\]</span></p>
+<p>Quantity <span class="math inline">\(_nL_x\)</span> is the number of person-years lived between exact ages <span class="math inline">\(x\)</span> and <span class="math inline">\(x+n\)</span>. It consists of person-years lived by people who survive the interval, plus person-years lived by people who die within the interval,</p>
+<p><span class="math display">\[_nL_x = l_{x+n} \times n + {_nd_x} \times {_na_x}.\]</span>
+Finally, <span class="math inline">\(e_x\)</span>, the number of years of life remaining to a person aged exactly <span class="math inline">\(x\)</span>, is
+<span class="math display">\[e_x = {_nL_x} + {_nL_{x+n}} + \cdots + {_{\infty}L_{\omega}}\]</span>.</p>
+<p>Although the results for <code>lifetab()</code> and <code>lifeexp()</code> do vary with difference choices for <code>infant</code>, <code>child</code>, or <code>closed</code>, the differences are often small,</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>lin <span class="ot">&lt;-</span> nzmort <span class="sc">|&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="fu">lifeexp</span>(<span class="at">mx =</span> mx,</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>          <span class="at">by =</span> <span class="fu">c</span>(gender, year),</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>          <span class="at">infant =</span> <span class="st">&quot;linear&quot;</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>          <span class="at">suffix =</span> <span class="st">&quot;lin&quot;</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>ak <span class="ot">&lt;-</span> nzmort <span class="sc">|&gt;</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="fu">lifeexp</span>(<span class="at">mx =</span> mx,</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>          <span class="at">sex =</span> gender,</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>          <span class="at">by =</span> year,</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>          <span class="at">infant =</span> <span class="st">&quot;AK&quot;</span>, </span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>          <span class="at">suffix =</span> <span class="st">&quot;ak&quot;</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="fu">inner_join</span>(lin, ak, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;year&quot;</span>, <span class="st">&quot;gender&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">diff =</span> ex.lin <span class="sc">-</span> ex.ak)</span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt; # A tibble: 4 × 5</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt;   gender  year ex.lin ex.ak     diff</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;  &lt;int&gt;  &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;</span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt; 1 Female  2021   84.0  84.0 0.000906</span></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="co">#&gt; 2 Male    2021   80.5  80.5 0.00110 </span></span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="co">#&gt; 3 Female  2022   83.4  83.4 0.000771</span></span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a><span class="co">#&gt; 4 Male    2022   80.0  80.0 0.000965</span></span></code></pre></div>
+</div>
+<div id="uncertainty" class="section level3" number="2.2.3">
+<h3><span class="header-section-number">2.2.3</span> Uncertainty</h3>
+<p>The examples of life tables and life expectancy so far have all been based on a deterministic input, <code>mx</code> column of data frame <code>nzmort</code>,</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>nzmort</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 84 × 6</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt;     year gender age         deaths   popn        mx</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt;    &lt;int&gt; &lt;chr&gt;  &lt;fct&gt;        &lt;int&gt;  &lt;int&gt;     &lt;dbl&gt;</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt;  1  2021 Female Infant         108  29570 0.00365  </span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt;  2  2021 Female 1-4 years       30 118950 0.000252 </span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt;  3  2021 Female 5-9 years       12 158350 0.0000758</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt;  4  2021 Female 10-14 years     21 163800 0.000128 </span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt;  5  2021 Female 15-19 years     51 152960 0.000333 </span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co">#&gt;  6  2021 Female 20-24 years     54 160250 0.000337 </span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co">#&gt;  7  2021 Female 25-29 years     60 180290 0.000333 </span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co">#&gt;  8  2021 Female 30-34 years     63 192070 0.000328 </span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co">#&gt;  9  2021 Female 35-39 years    105 171970 0.000611 </span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co">#&gt; 10  2021 Female 40-44 years    153 157740 0.000970 </span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt; # ℹ 74 more rows</span></span></code></pre></div>
+<p>The data frame <code>nzmort_rvec</code> instead uses a rvec to represent mortality rates,</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">library</span>(rvec)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt; Attaching package: &#39;rvec&#39;</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt; The following objects are masked from &#39;package:stats&#39;:</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt;     sd, var</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt; The following object is masked from &#39;package:base&#39;:</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt;     rank</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>nzmort_rvec</span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt; # A tibble: 84 × 4</span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co">#&gt;     year gender age                                 mx</span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co">#&gt;    &lt;int&gt; &lt;chr&gt;  &lt;fct&gt;                     &lt;rdbl&lt;1000&gt;&gt;</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="co">#&gt;  1  2021 Female Infant         0.0032 (0.0028, 0.0037)</span></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co">#&gt;  2  2021 Female 1-4 years   0.00018 (0.00014, 0.00022)</span></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co">#&gt;  3  2021 Female 5-9 years   9.2e-05 (7.3e-05, 0.00012)</span></span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co">#&gt;  4  2021 Female 10-14 years 0.00012 (9.9e-05, 0.00014)</span></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co">#&gt;  5  2021 Female 15-19 years 0.00027 (0.00023, 0.00031)</span></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="co">#&gt;  6  2021 Female 20-24 years 0.00032 (0.00028, 0.00036)</span></span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a><span class="co">#&gt;  7  2021 Female 25-29 years 0.00034 (0.00031, 0.00038)</span></span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a><span class="co">#&gt;  8  2021 Female 30-34 years 0.00042 (0.00038, 0.00046)</span></span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a><span class="co">#&gt;  9  2021 Female 35-39 years   6e-04 (0.00054, 0.00065)</span></span>
+<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a><span class="co">#&gt; 10  2021 Female 40-44 years 0.00091 (0.00084, 0.00098)</span></span>
+<span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a><span class="co">#&gt; # ℹ 74 more rows</span></span></code></pre></div>
+<p>The <code>mx</code> rvec holds 1000 draws from the posterior distribution from a Bayesian model of mortality. The posterior distribution for infant mortality for females in 2021, for instance, has a posterior median of 0.0032, and a 95% credible interval of (0.0028, 0.0037).</p>
+<p>If the input to <code>lifetab()</code> or <code>lifeexp()</code> is an rvec, then the output will be too. Uncertainty about mortality rates is propagated through to quantities derived from these rates.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">library</span>(rvec)</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>nzmort_rvec <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">2022</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>         gender <span class="sc">==</span> <span class="st">&quot;Female&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>  <span class="fu">lifetab</span>(<span class="at">mx =</span> mx) <span class="sc">|&gt;</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>  <span class="fu">select</span>(age, qx, lx)</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#&gt; # A tibble: 21 × 3</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt;    age                                 qx                   lx</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt;    &lt;fct&gt;                     &lt;rdbl&lt;1000&gt;&gt;         &lt;rdbl&lt;1000&gt;&gt;</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt;  1 Infant         0.0034 (0.0029, 0.0039) 1e+05 (1e+05, 1e+05)</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="co">#&gt;  2 1-4 years     0.00075 (6e-04, 0.00095) 99661 (99613, 99708)</span></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a><span class="co">#&gt;  3 5-9 years     5e-04 (0.00039, 0.00063) 99587 (99534, 99638)</span></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="co">#&gt;  4 10-14 years 0.00064 (0.00053, 0.00076) 99538 (99479, 99594)</span></span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a><span class="co">#&gt;  5 15-19 years    0.0014 (0.0012, 0.0016) 99474 (99411, 99532)</span></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a><span class="co">#&gt;  6 20-24 years    0.0017 (0.0015, 0.0019) 99332 (99265, 99393)</span></span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a><span class="co">#&gt;  7 25-29 years    0.0018 (0.0017, 0.0021) 99163 (99093, 99231)</span></span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a><span class="co">#&gt;  8 30-34 years    0.0023 (0.0021, 0.0025) 98979 (98901, 99053)</span></span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a><span class="co">#&gt;  9 35-39 years    0.0032 (0.0029, 0.0035) 98753 (98666, 98837)</span></span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a><span class="co">#&gt; 10 40-44 years    0.0048 (0.0044, 0.0052) 98438 (98339, 98530)</span></span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a><span class="co">#&gt; # ℹ 11 more rows</span></span></code></pre></div>
+</div>
+</div>
+</div>
+<div id="tools-for-developers" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Tools for developers</h1>
+<p><strong>poputils</strong> provides some functions that developers creating packages to be used by demographers may find useful.</p>
+<div id="labels-1" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> Labels</h2>
+<p><code>check_age()</code> and <code>age_group_type()</code> can be useful in functions that involve age group labels. <code>check_age()</code> performs some basic validity checks, while <code>age_group_type()</code> assesses whether a set of labels belongs to type <code>&quot;single&quot;</code>, <code>&quot;five&quot;</code>, or <code>&quot;lt&quot;</code>.</p>
+<p>It is often possible to guess the nature of a demographic variable, or of categories within a demographic variable, based on names and labels. Functions <code>find_var_age()</code>, <code>find_var_sexgender()</code>, <code>find_var_time()</code>, <code>find_label_female()</code>, and <code>find_label_male()</code> help with these sorts of inferences.</p>
+</div>
+<div id="data-manipulation" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> Data manipulation</h2>
+<p>Function <code>groups_colnums()</code> is helpful when implementing <a href="https://tidyselect.r-lib.org/reference/language.html">tidyselect</a> methods when the data are held in a grouped data frame.</p>
+<p><code>matrix_to_list_of_cols()</code> and <code>matrix_to_list_of_rows()</code> convert from matrices to lists of vectors.</p>
+<p><code>to_matrix()</code> converts a data frame to a matrix. The data frame potentially has more than two classification variables, and the rows and/or columns of the matrix can be formed from combinations of these variables.</p>
+</div>
+</div>
+<div id="future-developments" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Future developments</h1>
+<div id="definite" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> Definite</h2>
+<ul>
+<li><strong>Stable populations</strong>. Given mortality and fertility profiles, generate the associated stable population.</li>
+<li><strong>Time labels</strong> Functions for dealing with time labels analogous to the existing ones dealing with age labels. The functions need to allow for one-month and one-quarter periods, and for ‘exact times’, ie dates.</li>
+<li><strong>Multiple decrement life tables</strong> Extend <code>lifetab()</code> and <code>lifeexp()</code> to allow for multiple decrements.</li>
+<li><strong>Projection accounting</strong> Functions to turn projected demographic rates, and an initial population, into a projected demographic account. Needs flexibility over dimensions included, and needs deterministic and probabilistic versions.</li>
+<li><strong>TFR</strong> Function to calculation total fertility rates from age-specific fertility rates</li>
+<li><strong>Age, period, cohort labels</strong> Functions to allocate events to age groups, periods, or cohorts, based on data on dates of event and dates of birth.</li>
+</ul>
+</div>
+<div id="possible" class="section level2" number="4.2">
+<h2><span class="header-section-number">4.2</span> Possible</h2>
+<ul>
+<li><strong>Aggregation function</strong> Using <code>dplyr::count()</code>, <code>dplyr::summarise()</code>, or <code>stats::aggregate()</code> to aggregate counts or rates in a data frame is awkward. Given that this is such a common operation, it might be worthwhile to do a replacement.</li>
+</ul>
+</div>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-andreev2015average" class="csl-entry">
+Andreev, Evgeny M, and W Ward Kingkade. 2015. <span>“Average Age at Death in Infancy and Infant Mortality Level: Reconsidering the Coale-Demeny Formulas at Current Levels of Low Mortality.”</span> <em>Demographic Research</em> 33: 363–90.
+</div>
+<div id="ref-coale1983regional" class="csl-entry">
+Coale, Ansley J, Paul Demeny, and Barbara Vaughan. 1983. <em>Regional Model Life Tables and Stable Populations: Studies in Population</em>. Academic Press.
+</div>
+<div id="ref-keyfitz2005applied" class="csl-entry">
+Keyfitz, Nathan, and Hal Caswell. 2005. <em>Applied Mathematical Demography</em>. Springer.
+</div>
+<div id="ref-preston2001demography" class="csl-entry">
+Preston, Samuel H., Patrick Heuveline, and Michel Guillot. 2001. <em>Demography: Measuring and Modeling Population Processes</em>. Blackwell.
+</div>
+<div id="ref-wilmoth2021methods" class="csl-entry">
+Wilmoth, John R, Kirill Andreev, Dmitri Jdanov, Dana A Glei, and Tim Riffe. 2021. <span>“Methods Protocol for the Human Mortality Database. Version 6.”</span>
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
