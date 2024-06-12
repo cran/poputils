@@ -1,7 +1,7 @@
-e3d450d1230de824f47d9c9528baf4de *DESCRIPTION
+bc614d8f5c7edf95359961f6b73165f3 *DESCRIPTION
 88f6d5c58c6882fb1d7db4f386823be4 *LICENSE
 107abfd38a31ed6615ed44f596b35650 *NAMESPACE
-b9b414bb5aea558a7d5bf6e0aba73f44 *NEWS.md
+c649f8a7c7b6d005e4838492b66343cb *NEWS.md
 ab3c53ce06a1109027e089d5a9dd0238 *R/age-helpers.R
 86849dabdb043d6503835370789bb147 *R/age.R
 34cf0ebcb8a538051502c0547adcbd96 *R/check-functions.R
@@ -50,11 +50,11 @@ b53d2279c358d91d79ca2d46804c18f0 *man/reformat_sex.Rd
 2ccf4a79bf84a364e01978f32c3fe6b4 *man/to_matrix.Rd
 9db3910c80b7b49358bb2ee708c615f1 *man/west_lifetab.Rd
 4ce7917d9d23434645c2b86b46c4218b *src/cpp11.cpp
-591fd8ca3483c3f6d64e34ae0cf42fe3 *src/lifetab.cpp
+91f1aebf48b938c1c0f7fa4203b11af6 *src/lifetab.cpp
 37e39d601d3bb6c53b4353f8b195502f *src/logit.cpp
 75c2f61085eee6fa303f7180aa6b61a5 *tests/testthat.R
 6ba3f164fd5bab84e23ee529343db180 *tests/testthat/test-age-helpers.R
-908f1407aefebaff24855b3a65abaa72 *tests/testthat/test-age.R
+4afd9ffa0d59c1f998b09e81bef45de2 *tests/testthat/test-age.R
 beaa9923cf8bbe1e8ed7c80d21250cce *tests/testthat/test-check-functions.R
 3d7c327bcbc0518627c95d3413532e86 *tests/testthat/test-ex_to_lifetab.R
 8f680c4cc57892ce63fa9e75cc591834 *tests/testthat/test-find.R

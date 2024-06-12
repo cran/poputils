@@ -452,7 +452,7 @@ writable::doubles_matrix<> mx_to_Lx(cpp11::doubles_matrix<> mx,
     lx[j] = 1.0;
   for (int i = 0; i < m; i++) {
     string age = age_group_categ[i];
-    int nx_i = make_nx(age);
+    double nx_i = make_nx(age);
     double ax_i = ax[i];
     bool has_ax_i = !isnan(ax_i);
     for (int j = 0; j < n; j++) {

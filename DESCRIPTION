@@ -1,7 +1,7 @@
 Package: poputils
 Type: Package
 Title: Demographic Analysis and Data Manipulation
-Version: 0.3.0
+Version: 0.3.1
 Authors@R: 
     c(person(given = "John",
              family = "Bryant",
@@ -29,9 +29,9 @@ URL: https://bayesiandemography.github.io/poputils/,
         https://github.com/bayesiandemography/poputils
 BugReports: https://github.com/bayesiandemography/poputils/issues
 NeedsCompilation: yes
-Packaged: 2024-05-17 00:41:37 UTC; johnbryant
+Packaged: 2024-06-09 19:39:32 UTC; johnbryant
 Author: John Bryant [aut, cre],
   Bayesian Demography Limited [cph]
 Maintainer: John Bryant <john@bayesiandemography.com>
 Repository: CRAN
-Date/Publication: 2024-05-24 09:00:06 UTC
+Date/Publication: 2024-06-12 21:00:09 UTC
