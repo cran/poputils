@@ -25,6 +25,7 @@ lifeexp(
   data,
   mx = NULL,
   qx = NULL,
+  at = 0,
   age = age,
   sex = NULL,
   ax = NULL,
@@ -100,6 +101,9 @@ Currently the only option is `"constant".}
 
 \item{suffix}{Optional suffix added to new
 columns in result.}
+
+\item{at}{Age at which life expectancy is calculated
+(\verb{lifeexp() only). Default is }0`.}
 }
 \value{
 A \link[tibble:tibble]{tibble}.
@@ -270,6 +274,13 @@ west_lifetab |>
   lifeexp(qx = qx,
           sex = sex,
           by = level)
+
+## life expectancy at age 60
+west_lifetab |>
+  filter(level == 10) |>
+  lifeexp(mx = mx,
+          at = 60,
+          sex = sex)
 }
 \references{
 \itemize{
@@ -291,5 +302,6 @@ levels of low mortality. \emph{Demographic Research},
 \seealso{
 \itemize{
 \item \code{\link[=ex_to_lifetab_brass]{ex_to_lifetab_brass()}} Calculate life table from minimal inputs
+\item \code{\link[=q0_to_m0]{q0_to_m0()}} Convert between infant mortality measures
 }
 }

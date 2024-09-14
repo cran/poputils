@@ -659,4 +659,31 @@ writable::doubles_matrix<> qx_to_Lx(cpp11::doubles_matrix<> qx,
 }
 
 
-
+[[cpp11::register]]
+writable::doubles_matrix<> q0_to_m0_inner(cpp11::doubles_matrix<> q0,
+					  strings sex,
+					  doubles a0,
+					  strings infant) {
+  int m = q0.nrow();
+  int n = q0.ncol();
+  writable::doubles_matrix<> ans(m, n);
+  for (int i = 0; i < m; i++) {
+    double a0_i = a0[i];
+    bool has_a0_i = !isnan(a0_i);
+    string sex_i = sex[i];
+    for (int j = 0; j < n; j++) {
+      double q0_ij = q0(i, j);
+      if (isnan(q0_ij)) {
+	ans(i, j) = NA_REAL;
+      }
+      double a0_ij;
+      if (has_a0_i)
+	a0_ij = a0_i;
+      else
+	a0_ij = make_ax_ij_qx_infant(q0_ij, sex_i, infant[0]);
+      double L0_ij = q0_ij * a0_ij + (1 - q0_ij);
+      ans(i, j) = q0_ij / L0_ij;
+    }
+  }
+  return ans;
+}

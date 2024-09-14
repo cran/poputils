@@ -1,16 +1,25 @@
 ## 'lifetab' --------------------------------------------------------
 
-test_that("'lifetab' works with valid inputs, no 'by'", {
+test_that("'lifetab' works with valid inputs, mx, no 'by'", {
     data <- tibble::tibble(mx = c(0.02, 0.01, 0.015, 0.5),
                            age = c("0", "1-4", "5-9", "10+"))
     ans <- lifetab(data = data,
-                   mx = mx,
-                   age = age)
+                   mx = mx)
     expect_true(tibble::is_tibble(ans))
-    expect_identical(names(ans), c("mx", "age", "qx", "lx", "dx", "Lx", "ex"))
+    expect_identical(names(ans), c("age", "qx", "lx", "dx", "Lx", "ex"))
 })
 
-test_that("'lifetab' works with valid inputs, with 'by'", {
+test_that("'lifetab' works with valid inputs, qx, no 'by'", {
+    data <- tibble::tibble(qx = c(0.02, 0.01, 0.015, 0.5),
+                           age = c("0", "1-4", "5-9", "10+"))
+    ans <- lifetab(data = data,
+                   qx = qx,
+                   age = age)
+    expect_true(tibble::is_tibble(ans))
+    expect_identical(names(ans), c("age", "qx", "lx", "dx", "Lx", "ex"))
+})
+
+test_that("'lifetab' works with valid inputs, with 'by', mx", {
     data <- tibble::tibble(mx = rep(c(0.02, 0.01, 0.015, 0.5), times = 4),
                            age = rep(c("0", "1-4", "5-9", "10+"), times = 4),
                            gender = rep(rep(c("f", "m"), each = 4), times = 2),
@@ -23,10 +32,26 @@ test_that("'lifetab' works with valid inputs, with 'by'", {
                    infant = "AK",
                    child = "CD",
                    radix = 1)
-    expect_identical(ans[1:4], data)
+    expect_identical(ans[1:3], data[2:4])
 })
 
-test_that("'lifetab' gives same answer with 'by' and 'group_by'", {
+test_that("'lifetab' works with valid inputs, with 'by', qx", {
+    data <- tibble::tibble(qx = rep(c(0.02, 0.01, 0.015, 1), times = 4),
+                           age = rep(c("0", "1-4", "5-9", "10+"), times = 4),
+                           gender = rep(rep(c("f", "m"), each = 4), times = 2),
+                           region = rep(c("a", "b"), each = 8))
+    ans <- lifetab(data = data,
+                   qx = qx,
+                   age = age,
+                   sex = gender,
+                   by = region,
+                   infant = "AK",
+                   child = "CD",
+                   radix = 1)
+    expect_identical(ans[1:3], data[2:4])
+})
+
+test_that("'lifetab' gives same answer with 'by' and 'group_by', mx", {
     data <- tibble::tibble(mx = rep(c(0.02, 0.01, 0.015, 0.5), times = 4),
                            age = rep(c("0", "1-4", "5-9", "10+"), times = 4),
                            gender = rep(rep(c("f", "m"), each = 4), times = 2),
@@ -88,6 +113,103 @@ test_that("'lifetab' works with valid inputs, with 'by'", {
                    infant = "AK",
                    child = "CD")
     expect_identical(ans[1:2], unique(data[c("region", "gender")]))
+})
+
+test_that("'lifeexp' works with at = 5", {
+  data <- tibble::tibble(mx = c(0.02, 0.01, 0.015, 0.5),
+                         age = c("0", "1-4", "5-9", "10+"))
+  ans_obtained <- lifeexp(data = data,
+                          mx = mx,
+                          at = 5,
+                          age = age)
+  ans_expected <- lifetab(data = data,
+                          mx = mx,
+                          age = age)[3,"ex"]
+  expect_equal(ans_obtained, ans_expected)
+})
+
+
+
+## 'q0_to_m0' -----------------------------------------------------------------
+
+test_that("'q0_to_m0' works with valid inputs - all defaults", {
+  q0 <- 0.23
+  ans_obtained <- q0_to_m0(q0)
+  data <- data.frame(qx = c(q0, 1), age = c("0", "1+"))
+  lifetab <- lifetab(data, qx = qx)
+  ans_expected <- lifetab$dx[1] / lifetab$Lx[1]
+  expect_equal(ans_obtained, ans_expected)
+})
+
+test_that("'q0_to_m0' works with valid inputs - a0 supplied", {
+  q0 <- 0.23
+  a0 <- 0.7
+  ans_obtained <- q0_to_m0(q0, a0 = a0)
+  data <- data.frame(qx = c(q0, 1), age = c("0", "1+"), ax = c(a0, 0.4))
+  lifetab <- lifetab(data, qx = qx, ax = ax)
+  ans_expected <- lifetab$dx[1] / lifetab$Lx[1]
+  expect_equal(ans_obtained, ans_expected)
+})
+
+test_that("'q0_to_m0' works with valid inputs - infant is linear", {
+  q0 <- 0.23
+  ans_obtained <- q0_to_m0(q0, infant = "linear")
+  data <- data.frame(qx = c(q0, 1), age = c("0", "1+"))
+  lifetab <- lifetab(data, qx = qx, infant = "linear")
+  ans_expected <- lifetab$dx[1] / lifetab$Lx[1]
+  expect_equal(ans_obtained, ans_expected)
+})
+
+test_that("'q0_to_m0' works with valid inputs - qx length 2 rvec", {
+  q0 <- rvec::rvec(matrix((1:4)/10, nr = 2))
+  ans_obtained <- q0_to_m0(q0, infant = "linear")
+  data1 <- data.frame(qx = c(q0[1], 1), age = c("0", "1+"))
+  data2 <- data.frame(qx = c(q0[2], 1), age = c("0", "1+"))
+  lifetab1 <- lifetab(data1, qx = qx, infant = "linear")
+  lifetab2 <- lifetab(data2, qx = qx, infant = "linear")
+  ans_expected <- c(lifetab1$dx[1] / lifetab1$Lx[1],
+                    lifetab2$dx[1] / lifetab2$Lx[1])
+  expect_equal(ans_obtained, ans_expected)
+})
+
+test_that("'q0_to_m0' works with valid inputs - qx length 2 rvec", {
+  q0 <- west_lifetab$qx[west_lifetab$age == "0"]
+  sex <- west_lifetab$sex[west_lifetab$age == "0"]
+  ans_obtained <- q0_to_m0(q0, sex = sex, infant = "CD")
+  ans_expected <- west_lifetab$mx[west_lifetab$age == "0"]
+  expect_equal(ans_obtained, ans_expected)
+})
+
+
+test_that("'q0_to_m0' throws correct error when 'a0' is an rvec", {
+  q0 <- west_lifetab$qx[west_lifetab$age == "0"]
+  sex <- west_lifetab$sex[west_lifetab$age == "0"]
+  a0 <- rvec::rvec(west_lifetab$ax[west_lifetab$age == "0"])
+  expect_error(q0_to_m0(q0, sex = sex, a0 = a0),
+               "`a0` is an rvec.")
+})
+
+test_that("'q0_to_m0' throws correct error when 'a0' has values greater than 1", {
+  q0 <- west_lifetab$qx[west_lifetab$age == "0"]
+  sex <- west_lifetab$sex[west_lifetab$age == "0"]
+  a0 <- west_lifetab$ax[west_lifetab$age == "0"]
+  a0[3] <- 1.1
+  expect_error(q0_to_m0(q0, sex = sex, a0 = a0),
+               "`a0` has value greater than 1.")
+  a0[2] <- 1.1
+  expect_error(q0_to_m0(q0, sex = sex, a0 = a0),
+               "`a0` has values greater than 1.")
+})
+
+test_that("'q0_to_m0' throws correct error when q0 > 1", {
+  q0 <- west_lifetab$qx[west_lifetab$age == "0"]
+  sex <- west_lifetab$sex[west_lifetab$age == "0"]
+  q0[2] <- 3
+  expect_error(q0_to_m0(q0, sex = sex, a0 = a0),
+               "`q0` has value greater than 1.")
+  q0[3] <- 3
+  expect_error(q0_to_m0(q0, sex = sex, a0 = a0),
+               "`q0` has values greater than 1.")
 })
 
 
@@ -154,6 +276,7 @@ test_that("'lifetab_inner_one' works with valid inputs - lifetable, not rvec", {
     ans <- life_inner_one(data = data,
                           mx_colnum = mx_colnum,
                           qx_colnum = qx_colnum,
+                          at = 0,
                           age_colnum = age_colnum,
                           sex_colnum = sex_colnum,
                           ax_colnum = ax_colnum,
@@ -162,7 +285,7 @@ test_that("'lifetab_inner_one' works with valid inputs - lifetable, not rvec", {
                           suffix = suffix,
                           is_table = TRUE)
     expect_true(is.data.frame(ans))
-    expect_identical(ans[1:4], data)
+    expect_identical(ans[1:3], data[2:4])
 })
 
 test_that("'lifetab_inner_one' works with valid inputs - lifeexp, not rvec", {
@@ -187,6 +310,7 @@ test_that("'lifetab_inner_one' works with valid inputs - lifeexp, not rvec", {
     ans <- life_inner_one(data = data,
                           mx_colnum = mx_colnum,
                           qx_colnum = qx_colnum,
+                          at = 0,
                           age_colnum = age_colnum,
                           sex_colnum = sex_colnum,
                           ax_colnum = ax_colnum,
@@ -221,6 +345,7 @@ test_that("'lifetab_inner_one' works with valid inputs - lifeexp, not rvec - wit
     ans <- life_inner_one(data = data,
                           mx_colnum = mx_colnum,
                           qx_colnum = qx_colnum,
+                          at = 0,
                           age_colnum = age_colnum,
                           sex_colnum = sex_colnum,
                           ax_colnum = ax_colnum,
@@ -232,7 +357,6 @@ test_that("'lifetab_inner_one' works with valid inputs - lifeexp, not rvec - wit
     expect_identical(dim(ans), c(1L, 1L))
     expect_identical(names(ans), "ex.lt")
 })
-
 
 test_that("'lifetab_inner_one' works with valid inputs - lifeexp, not rvec; qx", {
     data <- tibble::tibble(qx = c(0.02, 0.01, 0.015, 0.5),
@@ -257,6 +381,7 @@ test_that("'lifetab_inner_one' works with valid inputs - lifeexp, not rvec; qx",
     ans <- life_inner_one(data = data,
                           mx_colnum = mx_colnum,
                           qx_colnum = qx_colnum,
+                          at = 0,
                           age_colnum = age_colnum,
                           sex_colnum = sex_colnum,
                           ax_colnum = ax_colnum,
@@ -292,6 +417,7 @@ test_that("'lifetab_inner_one' works with valid inputs - lifetable, rvec", {
     ans <- life_inner_one(data = data,
                           mx_colnum = mx_colnum,
                           qx_colnum = qx_colnum,
+                          at = 0,
                           age_colnum = age_colnum,
                           sex_colnum = sex_colnum,
                           ax_colnum = ax_colnum,
@@ -300,8 +426,44 @@ test_that("'lifetab_inner_one' works with valid inputs - lifetable, rvec", {
                           suffix = suffix,
                           is_table = TRUE)
     expect_true(is.data.frame(ans))
-    expect_identical(ans[1:4], data)
+    expect_identical(ans[1:3], data[2:4])
     expect_s3_class(ans[["ex.lt"]], "rvec_dbl")
+})
+
+test_that("'lifetab_inner_one' works with valid inputs - lifetable, rvec, qx", {
+  data <- tibble::tibble(qx = rvec::rvec(cbind(c(0.02, 0.01, 0.015, 0.5),
+                                               c(0.021, 0.011, 0.0151, 0.51))),
+                         age = c("0", "1-4", "5-9", "10+"),
+                         region = rep("A", 4),
+                         sex= rep("Female", 4))
+  mx_colnum <- c(mx = 1L)
+  qx_colnum = integer()
+  names(qx_colnum) <- character()
+  age_colnum <- c(age = 2L)
+  sex_colnum <- integer()
+  names(sex_colnum) <- character()
+  ax_colnum <- integer()
+  names(ax_colnum) <- character()
+  methods <- c(infant = "constant",
+               child = "constant",
+               closed = "constant",
+               open = "constant")
+  radix <- 10
+  suffix <- "lt"
+  ans <- life_inner_one(data = data,
+                        mx_colnum = mx_colnum,
+                        qx_colnum = qx_colnum,
+                        at = 0,
+                        age_colnum = age_colnum,
+                        sex_colnum = sex_colnum,
+                        ax_colnum = ax_colnum,
+                        methods = methods,
+                        radix = radix,
+                        suffix = suffix,
+                        is_table = TRUE)
+  expect_true(is.data.frame(ans))
+  expect_identical(ans[1:3], data[2:4])
+  expect_s3_class(ans[["ex.lt"]], "rvec_dbl")
 })
 
 test_that("'lifetab_inner_one' works with valid inputs - lifeexp, is rvec, mx", {
@@ -327,6 +489,7 @@ test_that("'lifetab_inner_one' works with valid inputs - lifeexp, is rvec, mx", 
     ans <- life_inner_one(data = data,
                           mx_colnum = mx_colnum,
                           qx_colnum = qx_colnum,
+                          at = 0,
                           age_colnum = age_colnum,
                           sex_colnum = sex_colnum,
                           ax_colnum = ax_colnum,
@@ -363,6 +526,7 @@ test_that("'lifetab_inner_one' works with valid inputs - lifeexp, is rvec, qx", 
     ans <- life_inner_one(data = data,
                           mx_colnum = mx_colnum,
                           qx_colnum = qx_colnum,
+                          at = 0,
                           age_colnum = age_colnum,
                           sex_colnum = sex_colnum,
                           ax_colnum = ax_colnum,
@@ -397,6 +561,7 @@ test_that("'lifetab_inner_one' works with valid inputs - lifetable, not rvec, ou
     ans <- life_inner_one(data = data,
                           mx_colnum = mx_colnum,
                           qx_colnum = qx_colnum,
+                          at = 0,
                           age_colnum = age_colnum,
                           sex_colnum = sex_colnum,
                           ax_colnum = ax_colnum,
@@ -405,7 +570,7 @@ test_that("'lifetab_inner_one' works with valid inputs - lifetable, not rvec, ou
                           suffix = suffix,
                           is_table = TRUE)
     expect_true(is.data.frame(ans))
-    expect_identical(ans[1:4], data[c(2, 3, 1, 4), ])
+    expect_identical(ans[1:3], data[c(2,3,1,4),2:4])
 })
 
 test_that("'lifetab_inner_one' works with valid inputs - ax supplied", {
@@ -429,6 +594,7 @@ test_that("'lifetab_inner_one' works with valid inputs - ax supplied", {
   ans <- life_inner_one(data = data,
                         mx_colnum = mx_colnum,
                         qx_colnum = qx_colnum,
+                        at = 0,
                         age_colnum = age_colnum,
                         sex_colnum = sex_colnum,
                         ax_colnum = ax_colnum,
@@ -437,7 +603,7 @@ test_that("'lifetab_inner_one' works with valid inputs - ax supplied", {
                         suffix = suffix,
                         is_table = TRUE)
   expect_true(is.data.frame(ans))
-  expect_identical(ans[1:5], data)
+  expect_identical(ans[1:4], data[-1])
 })
 
 test_that("'lifetab_inner_one' works with valid inputs - is qx", {
@@ -462,6 +628,7 @@ test_that("'lifetab_inner_one' works with valid inputs - is qx", {
   ans <- life_inner_one(data = data,
                         mx_colnum = mx_colnum,
                         qx_colnum = qx_colnum,
+                        at = 0,
                         age_colnum = age_colnum,
                         sex_colnum = sex_colnum,
                         ax_colnum = ax_colnum,
@@ -470,10 +637,8 @@ test_that("'lifetab_inner_one' works with valid inputs - is qx", {
                         suffix = suffix,
                         is_table = TRUE)
   expect_true(is.data.frame(ans))
-  expect_identical(ans[1:5], data)
+  expect_identical(ans[1:4], data[2:5])
 })
-
-
 
 
 ## 'mx_to_lifetab' ------------------------------------------------------------

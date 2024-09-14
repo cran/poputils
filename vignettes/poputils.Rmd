@@ -129,6 +129,16 @@ west_lifetab |>
   lifeexp(qx = qx)
 ```
 
+By default, `lifeexp()` calculates life expectancy at age zero. It can, however, be used to calculate life expectancy at other ages.
+```{r}
+nzmort |>
+  lifeexp(mx = mx,
+          at = 65,
+          by = c(gender, year))  
+```
+
+
+
 ### Calculation methods
 
 Alternative methods for calculating life tables differ mainly in their assumptions variation within age groups [@preston2001demography; @keyfitz2005applied]. It turns out that, for the purposes of constructing life tables, all the relevant information about the way that mortality varies by age within each age group can be captured by a single number: the average length of time lived in an interval by people who die in that interval [@preston2001demography, p.43]. This number is denoted $_na_x$, where $x$ is exact age at the start of the internal, and $n$ is the length of the interval. The quantity $_5a_{20}$, for instance, refers to the average number of years lived after their 20th birthday by people who die between their 20th and 25th birthdays. When $n=1$, the $n$ subscript is typically omitted.

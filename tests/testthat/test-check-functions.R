@@ -1,4 +1,22 @@
 
+## 'check_at_in_age' ----------------------------------------------------------
+
+test_that("'check_at_in_age' returns TRUE with valid inputs", {
+  age <- c("10+", "1-4", "0", "5-9")
+  expect_true(check_at_in_age(at = 0, age = age))
+  expect_true(check_at_in_age(at = 1, age = age))
+  expect_true(check_at_in_age(at = 5, age = age))
+  expect_true(check_at_in_age(at = 10, age = age))
+})
+
+test_that("'check_at_in_age' throws correct error with invalid inputs", {
+  age <- c("10+", "1-4", "0", "5-9")
+  expect_error(check_at_in_age(at = 2, age = age),
+               "Invalid value for `at`.")
+})
+
+
+
 ## 'check_at_most_one_colnum' -------------------------------------------------
 
 test_that("'check_at_most_one_colnum' returns TRUE with valid inputs", {
@@ -301,6 +319,78 @@ test_that("'check_no_overlap_colnums' throws correct error with overlap", {
 })
 
 
+## 'check_not_rvec' -----------------------------------------------------------
+
+test_that("'check_not_rvec' returns TRUE with valid inputs", {
+  expect_true(check_not_rvec(NULL))
+  expect_true(check_not_rvec(1:3))
+  expect_true(check_not_rvec("hello"))
+})
+
+test_that("'check_not_rvec' raises error with rvec", {
+  expect_error(check_not_rvec(rvec::rvec(matrix(1:5, nr = 1)), nm_x = "xx"),
+               "`xx` is an rvec.")
+  expect_error(check_not_rvec(rvec::rvec(matrix(letters, nr = 1)), nm_x = "y"),
+               "`y` is an rvec.")
+})
+
+
+## 'check_n' ------------------------------------------------------------------
+
+test_that("'check_n' returns TRUE with valid inputs", {
+    expect_true(check_n(n = 4, nm_n = "n", min = 4L, max = NULL, divisible_by = 1L))
+    expect_true(check_n(n = 4, nm_n = "n", min = NULL, max = NULL, divisible_by = NULL))
+})
+
+test_that("'check_n' throws correct error with rvec", {
+  n <- rvec::rvec(list(1:3))
+  expect_error(check_n(n = n, nm_n = "n", min = 4L, max = NULL, divisible_by = 1L),
+               "`n` is an rvec.")
+})
+
+test_that("'check_n' throws correct error with non-numeric", {
+    expect_error(check_n(n = "4", nm_n = "n", min = 4L, max = NULL, divisible_by = 1L),
+                 "`n` is non-numeric.")
+})
+
+test_that("'check_n' throws correct error with wrong length", {
+    expect_error(check_n(n = integer(), nm_n = "n", min = 4L, max = NULL, divisible_by = 1L),
+                 "`n` does not have length 1.")
+    expect_error(check_n(n = 10:11, nm_n = "n", min = 4L, max = NULL, divisible_by = 1L),
+                 "`n` does not have length 1.")
+})
+
+test_that("'check_n' throws correct error with NA", {
+    expect_error(check_n(n = NA_real_, nm_n = "n", min = 4L, max = NULL, divisible_by = 1L),
+                 "`n` is NA.")
+})
+
+test_that("'check_n' throws correct error with Inf", {
+    expect_error(check_n(n = Inf, nm_n = "n", min = 4L, max = NULL, divisible_by = 1L),
+                 "`n` is Inf.")
+})
+
+test_that("'check_n' throws correct error with non-integer", {
+    expect_error(check_n(n = 6.4, nm_n = "n", min = 4L, max = NULL, divisible_by = 1L),
+                 "`n` is not an integer.")
+})
+
+test_that("'check_n' throws correct error when less than min", {
+    expect_error(check_n(n = 3, nm_n = "n", min = 4L, max = NULL, divisible_by = 1L),
+                 "`n` is less than 4.")
+})
+
+test_that("'check_n' throws correct error when greater than max", {
+    expect_error(check_n(n = 60, nm_n = "n", min = 4, max = 10, divisible_by = 1L),
+                 "`n` is greater than 10.")
+})
+
+test_that("'check_n' throws correct error when not divisible by 'divisible_by'", {
+    expect_error(check_n(n = 61, nm_n = "n", min = 4, max = Inf, divisible_by = 5L),
+                 "`n` is not divisible by 5.")
+})
+
+
 ## 'check_no_overlap_colnums_pair' --------------------------------------------
 
 test_that("'check_no_overlap_colnums_pair' returns TRUE with valid inputs - both nonempty", {
@@ -585,47 +675,47 @@ test_that("'check_numeric' returns correct error with check_whole", {
 
 test_that("'check_qx_rvec' returns TRUE with valid rvec inputs", {
     x <- rvec::rvec_dbl()
-    expect_true(check_qx(x))
+    expect_true(check_qx(x, nm_qx = "qx"))
     x <- rvec::rvec_int(matrix(1:0))
-    expect_true(check_qx(x))
+    expect_true(check_qx(x, nm_qx = "qx"))
     x <- rvec::rvec_dbl(matrix(c(0.5, 0.33)))
-    expect_true(check_qx(x))
+    expect_true(check_qx(x, nm_qx = "qx"))
 })
 
 test_that("'check_qx_vec' returns TRUE with valid vector inputs", {
     x <- 0:1
-    expect_true(check_qx(x))
+    expect_true(check_qx(x, nm_qx = "qx"))
     x <- c(0.2, 0.1, NA)
-    expect_true(check_qx(x))
+    expect_true(check_qx(x, nm_qx = "qx"))
     x <- double()
-    expect_true(check_qx(x))
+    expect_true(check_qx(x, nm_qx = "qx"))
 })
 
 test_that("'check_qx' throws correct error with non-numeric", {
     x <- rvec::rvec_lgl()
-    expect_error(check_qx(x),
+    expect_error(check_qx(x, nm_qx = "qx"),
                  "`qx` is non-numeric")
     x <- NULL
-    expect_error(check_qx(x),
-                 "`qx` is non-numeric")
+    expect_error(check_qx(x, nm_qx = "q0"),
+                 "`q0` is non-numeric")
     x <- c(TRUE, FALSE)
-    expect_error(check_qx(x),
+    expect_error(check_qx(x, nm_qx = "qx"),
                  "`qx` is non-numeric")
 })
 
 test_that("'check_qx' throws correct error with negative value", {
     x <- rvec::rvec_dbl(matrix(c(1, 0, NA, -0.1), nrow = 1))
-    expect_error(check_qx(x),
-                 "`qx` has negative value.")
-    expect_error(check_qx(c(1, -1, 0, -1, 1)),
-                 "`qx` has negative values.")
+    expect_error(check_qx(x, nm_qx = "q0"),
+                 "`q0` has negative value.")
+    expect_error(check_qx(c(1, -1, 0, -1, 1), nm_qx = "q0"),
+                 "`q0` has negative values.")
 })
 
 test_that("'check_qx' throws correct error with values greater than 1", {
     x <- rvec::rvec_dbl(matrix(c(1, 0, NA, 1.1), nrow = 1))
-    expect_error(check_qx(x),
+    expect_error(check_qx(x, nm_qx = "qx"),
                  "`qx` has value greater than 1.")
-    expect_error(check_qx(c(1, 2, 0, 1.000001, 1)),
+    expect_error(check_qx(c(1, 2, 0, 1.000001, 1), nm_qx = "qx"),
                  "`qx` has values greater than 1.")
 })
 

@@ -1,5 +1,25 @@
 
-    
+## HAS_TESTS
+#' Check that 'at' Picks Out the Lower Limit of Age Group in 'age'
+#'
+#' @param at An integer scalar
+#' @param age A vector of age labels
+#'
+#' @returns TRUE, invisibly
+#'
+#' @noRd
+check_at_in_age <- function(at, age) {
+  lower <- age_lower(age)
+  if (!(at %in% lower))
+    cli::cli_abort(c("Invalid value for {.arg at}.",
+                     i = "{.arg at} must equal the lower limit of an age group in {.arg age}.",
+                     i = "{.arg at}: {.val {at}}.",
+                     i = "Age groups in {.arg age}: {.val {age}}.",
+                     i = "Lower limits of age groups: {.val {lower}}."))
+  invisible(TRUE)
+}
+
+
 ## HAS_TESTS
 #' Check that colnums vectors, as produced by
 #' tidyselect::eval_select(), each point
@@ -27,10 +47,11 @@ check_at_most_one_colnum <- function(x) {
 
 
 ## HAS_TESTS
-#' Check that 'ax' is valid
+#' Check That 'ax' is Valid
 #'
 #' Check that 'ax' is numeric, non-negative, less than
 #' corresponding 'nx'. NAs are allowed.
+#' Cannot be an rvec.
 #'
 #' @param ax Numeric vector
 #' @param ax Character vector of age group labels
@@ -39,33 +60,34 @@ check_at_most_one_colnum <- function(x) {
 #'
 #' @noRd
 check_ax <- function(ax, age) {
-    if (!is.numeric(ax))
-        cli::cli_abort(c("{.arg ax} is non-numeric.",
-                         i = "{.arg ax} has class {.cls {class(ax)}}."))
-    is_neg <- !is.na(ax) & ax < 0
-    i_neg <- match(TRUE, is_neg, nomatch = 0L)
-    if (i_neg > 0L) {
-        age_neg <- age[[i_neg]]
-        ax_neg <- ax[[i_neg]]
-        cli::cli_abort(c("{.arg ax} has negative value.",
-                         i = "Value of {.arg ax} for age group {.val {age_neg}} is {.val {ax_neg}}."))
-    }
-    check_equal_length(x = ax,
-                       y = age,
-                       nm_x = "ax",
-                       nm_y = "age")
-    age_group_categ <- age_group_categ(age)
-    is_ax_le_nx <- is_ax_le_nx(ax, age_group_categ)
-    i_gt <- match(FALSE, is_ax_le_nx, nomatch = 0L)
-    if (i_gt > 0L) {
-        age_gt <- age[[i_gt]]
-        ax_gt <- ax[[i_gt]]
-        width <- age_upper(age_gt) - age_lower(age_gt)
-        cli::cli_abort(c("{.arg ax} larger than width of corresponding age group.",
-                         i = "Value of {.arg ax} for age group {.val {age_gt}} is {.val {ax_gt}}.",
-                         i = "Age group {.val {age_gt}} has width {.val {width}}."))
-    }
-    invisible(TRUE)
+  check_not_rvec(x = ax, nm_x = "ax")
+  if (!is.numeric(ax))
+    cli::cli_abort(c("{.arg ax} is non-numeric.",
+                     i = "{.arg ax} has class {.cls {class(ax)}}."))
+  is_neg <- !is.na(ax) & ax < 0
+  i_neg <- match(TRUE, is_neg, nomatch = 0L)
+  if (i_neg > 0L) {
+    age_neg <- age[[i_neg]]
+    ax_neg <- ax[[i_neg]]
+    cli::cli_abort(c("{.arg ax} has negative value.",
+                     i = "Value of {.arg ax} for age group {.val {age_neg}} is {.val {ax_neg}}."))
+  }
+  check_equal_length(x = ax,
+                     y = age,
+                     nm_x = "ax",
+                     nm_y = "age")
+  age_group_categ <- age_group_categ(age)
+  is_ax_le_nx <- is_ax_le_nx(ax, age_group_categ)
+  i_gt <- match(FALSE, is_ax_le_nx, nomatch = 0L)
+  if (i_gt > 0L) {
+    age_gt <- age[[i_gt]]
+    ax_gt <- ax[[i_gt]]
+    width <- age_upper(age_gt) - age_lower(age_gt)
+    cli::cli_abort(c("{.arg ax} larger than width of corresponding age group.",
+                     i = "Value of {.arg ax} for age group {.val {age_gt}} is {.val {ax_gt}}.",
+                     i = "Age group {.val {age_gt}} has width {.val {width}}."))
+  }
+  invisible(TRUE)
 }
 
 
@@ -278,30 +300,86 @@ check_lx <- function(lx, age) {
 }
 
 
-
-
 ## HAS_TESTS
-#' Check that an rvec of mortality rates is valid
+#' Check That a Vector (Possibly Rvec) orfRates is Valid
 #'
-#' Check that rvec is double and
+#' Check that is rvec or double and
 #' all non-negative. NAs are allowed.
 #'
-#' @param mx An rvec_dbl.
+#' @param mx An rvec_dbl or double.
 #'
 #' @returns TRUE, invisibly
 #'
 #' @noRd
 check_mx <- function(mx) {
-    if (!is.numeric(mx))
-        cli::cli_abort(c("{.arg mx} is non-numeric.",
-                         i = "{.arg mx} has class {.cls {class(mx)}}."))
-    if (rvec::is_rvec(mx))
-        mx <- as.numeric(mx)
-    n_neg <- sum(mx < 0, na.rm = TRUE)
-    if (n_neg > 0L)
-        cli::cli_abort("{.arg mx} has negative {cli::qty(n_neg)} value{?s}.")
-    invisible(TRUE)
+  if (rvec::is_rvec(mx))
+    is_numeric <- is.numeric(as.matrix(mx))
+  else
+    is_numeric <- is.numeric(mx)
+  if (!is_numeric)
+    cli::cli_abort(c("{.arg mx} is non-numeric.",
+                     i = "{.arg mx} has class {.cls {class(mx)}}."))
+  if (rvec::is_rvec(mx))
+    mx <- as.numeric(mx)
+  n_neg <- sum(mx < 0, na.rm = TRUE)
+  if (n_neg > 0L)
+    cli::cli_abort("{.arg mx} has negative {cli::qty(n_neg)} value{?s}.")
+  invisible(TRUE)
 }
+
+
+## HAS_TESTS
+#' Check Whole Number
+#'
+#' Check that `n` is  finite, non-NA scalar that
+#' is an integer or integerish (ie is equal to `round(n)`),
+#' and optionally within a specified range
+#' and divisible by a specified number.
+#'
+#' @param n A whole number
+#' @param nm_n Name for 'n' to be used in error messages
+#' @param min Minimum value 'n' can take. Can be NULL.
+#' @param max Maximum values 'n' can take. Can be NULL.
+#' @param divisible_by 'n' must be divisible by this. Can be NULL.
+#'
+#' @returns
+#' If all tests pass, `check_n()` returns `TRUE` invisibly.
+#' Otherwise it throws an error.
+#'
+#' @examples
+#' check_n(10, nm_n = "count", min = 0, max = NULL, divisible_by = 1)
+#' check_n(10, nm_n = "count", min = NULL, max = NULL, divisible_by = NULL)
+#' check_n(10, nm_n = "n", min = 5, max = 10, divisible_by = 2)
+#' @export
+check_n <- function(n, nm_n, min, max, divisible_by) {
+  if (rvec::is_rvec(n))
+    cli::cli_abort("{.arg {nm_n}} is an rvec.")
+  if (!is.numeric(n))
+    cli::cli_abort(c("{.arg {nm_n}} is non-numeric.",
+                     i = "{.arg {nm_n}} has class {.cls {class(n)}}."))
+  if (length(n) != 1L)
+    cli::cli_abort(c("{.arg {nm_n}} does not have length 1.",
+                     i = "{.arg {nm_n}} has length {length(n)}."))
+  if (is.na(n))
+    cli::cli_abort("{.arg {nm_n}} is {.val {NA}}.")
+  if (is.infinite(n))
+    cli::cli_abort("{.arg {nm_n}} is {.val {Inf}}.")
+  if (!isTRUE(all.equal(round(n), n)))
+    cli::cli_abort(c("{.arg {nm_n}} is not an integer.",
+                     i = "{.arg {nm_n}} is {.val {n}}."))
+  if (!is.null(min) && (n < min))
+    cli::cli_abort(c("{.arg {nm_n}} is less than {min}.",
+                     i = "{.arg {nm_n}} is {.val {n}}."))
+  if (!is.null(max) && (n > max))
+    cli::cli_abort(c("{.arg {nm_n}} is greater than {max}.",
+                     i = "{.arg {nm_n}} is {.val {n}}."))
+  if (!is.null(divisible_by) && (n %% divisible_by != 0L))
+    cli::cli_abort(c("{.arg {nm_n}} is not divisible by {divisible_by}.",
+                     i = "{.arg nm_n}: {.val {n}}."))
+  invisible(TRUE)
+}
+
+
 
 
 ## HAS_TESTS
@@ -360,12 +438,27 @@ check_no_overlap_colnums_pair <- function(pair) {
     }
     invisible(TRUE)
 }
+
+
+## HAS_TESTS
+#' Check That Not An Rvec
+#'
+#' @param x A vector
+#'
+#' @returns TRUE, ivisibly
+#'
+#' @noRd
+check_not_rvec <- function(x, nm_x) {
+  if (rvec::is_rvec(x))
+    cli::cli_abort("{.arg {nm_x}} is an rvec.")
+  invisible(TRUE)
+}
         
 
 ## HAS_TESTS
 #' Check a number
 #'
-#' Check that `x` is valid integer or double scalar
+#' Check that `x` is valid integer or double scalar or rvec scalar
 #'
 #' @param x A numeric scalar
 #' @param x_arg Name for `x` to be
@@ -384,48 +477,52 @@ check_number <- function(x,
                          check_positive,
                          check_nonneg,
                          check_whole) {
-    if (!is.numeric(x))
-        cli::cli_abort(c("{.arg {x_arg}} is non-numeric.",
-                         i = "{.arg {x_arg}} has class {.cls {class(x)}}."))
-    if (length(x) != 1L)
-        cli::cli_abort(c("{.arg {x_arg}} does not have length 1.",
-                         i = "{.arg {x_arg}} has length {.val {length(x)}}."))
-    if (rvec::is_rvec(x)) {
-        x <- as.numeric(x)
-        return(check_numeric(x = x,
-                             x_arg = x_arg,
-                             check_na = check_na,
-                             check_positive = check_positive,
-                             check_nonneg = check_nonneg,
-                             check_whole = check_whole))
-    }
-    if (check_na) {
-        if (is.na(x))
-            cli::cli_abort("{.arg {x_arg}} is {.val {NA}}.")
-    }
-    if (is.infinite(x))
-        cli::cli_abort("{.arg {x_arg}} is infinite.")
-    if (check_positive && !is.na(x)) {
-        if (x <= 0)
-            cli::cli_abort(c("{.arg {x_arg}} is non-positive.",
-                             i = "{.arg {x_arg}} equals {.val {x}}."))
-    }
-    if (check_nonneg && !is.na(x)) {
-        if (x < 0)
-            cli::cli_abort(c("{.arg {x_arg}} is negative.",
-                             i = "{.arg {x_arg}} equals {.val {x}}."))
-    }
-    if (check_whole && !is.na(x)) {
-        if (x != round(x))
-            cli::cli_abort(c("{.arg {x_arg}} is not a whole number.",
-                             i = "{.arg {x_arg}} is {.val {x}}."))
-    }
-    invisible(TRUE)
+  if (rvec::is_rvec(x))
+    is_numeric <- is.numeric(as.matrix(x))
+  else
+    is_numeric <- is.numeric(x)
+  if (!is_numeric)
+    cli::cli_abort(c("{.arg {x_arg}} is non-numeric.",
+                     i = "{.arg {x_arg}} has class {.cls {class(x)}}."))
+  if (length(x) != 1L)
+    cli::cli_abort(c("{.arg {x_arg}} does not have length 1.",
+                     i = "{.arg {x_arg}} has length {.val {length(x)}}."))
+  if (rvec::is_rvec(x)) {
+    x <- as.numeric(x)
+    return(check_numeric(x = x,
+                         x_arg = x_arg,
+                         check_na = check_na,
+                         check_positive = check_positive,
+                         check_nonneg = check_nonneg,
+                         check_whole = check_whole))
+  }
+  if (check_na) {
+    if (is.na(x))
+      cli::cli_abort("{.arg {x_arg}} is {.val {NA}}.")
+  }
+  if (is.infinite(x))
+    cli::cli_abort("{.arg {x_arg}} is infinite.")
+  if (check_positive && !is.na(x)) {
+    if (x <= 0)
+      cli::cli_abort(c("{.arg {x_arg}} is non-positive.",
+                       i = "{.arg {x_arg}} equals {.val {x}}."))
+  }
+  if (check_nonneg && !is.na(x)) {
+    if (x < 0)
+      cli::cli_abort(c("{.arg {x_arg}} is negative.",
+                       i = "{.arg {x_arg}} equals {.val {x}}."))
+  }
+  if (check_whole && !is.na(x)) {
+    if (x != round(x))
+      cli::cli_abort(c("{.arg {x_arg}} is not a whole number.",
+                       i = "{.arg {x_arg}} is {.val {x}}."))
+  }
+  invisible(TRUE)
 }
 
 
 ## HAS_TESTS
-#' Check a numeric vector
+#' Check a 'Numeric' Vector (Including Rvec)
 #'
 #' Check that `x` is valid integer or double vector.
 #'
@@ -443,67 +540,76 @@ check_number <- function(x,
 #'
 #' @noRd
 check_numeric <- function(x,
-                         x_arg,
-                         check_na,
-                         check_positive,
-                         check_nonneg,
-                         check_whole) {
-    if (!is.numeric(x))
-        cli::cli_abort(c("{.arg {x_arg}} is non-numeric.",
-                         i = "{.arg {x_arg}} has class {.cls {class(x)}}."))
-    x <- as.numeric(x)
-    if (check_na) {
-        n_na <- sum(is.na(x))
-        if (n_na > 0L)
-            cli::cli_abort("{.arg {x_arg}} has {cli::qty(n_na)} NA{?s}.")
-    }
-    n_inf <- sum(is.infinite(x))
-    if (n_inf > 0L)
-        cli::cli_abort("{.arg {x_arg}} has non-finite {cli::qty(n_inf)} value{?s}.")
-    if (check_positive) {
-        n_nonpos <- sum(x <= 0, na.rm = TRUE)
-        if (n_nonpos > 0L)
-            cli::cli_abort("{.arg {x_arg}} has non-positive {cli::qty(n_nonpos)} value{?s}.")
-    }
-    if (check_nonneg) {
-        n_neg <- sum(x < 0, na.rm = TRUE)
-        if (n_neg > 0L)
-            cli::cli_abort("{.arg {x_arg}} has negative {cli::qty(n_neg)} value{?s}.")
-    }
-    if (check_whole) {
-        n_frac <- sum(x != round(x), na.rm = TRUE)
-        if (n_frac > 0L)
-            cli::cli_abort(paste("{.arg {x_arg}} has {cli::qty(n_frac)} value{?s}",
-                                 "that {?is/are} not whole number{?s}."))
-    }
-    invisible(TRUE)
+                          x_arg,
+                          check_na,
+                          check_positive,
+                          check_nonneg,
+                          check_whole) {
+  if (rvec::is_rvec(x))
+    is_numeric <- is.numeric(as.matrix(x))
+  else
+    is_numeric <- is.numeric(x)
+  if (!is_numeric)
+    cli::cli_abort(c("{.arg {x_arg}} is non-numeric.",
+                     i = "{.arg {x_arg}} has class {.cls {class(x)}}."))
+  x <- as.numeric(x)
+  if (check_na) {
+    n_na <- sum(is.na(x))
+    if (n_na > 0L)
+      cli::cli_abort("{.arg {x_arg}} has {cli::qty(n_na)} NA{?s}.")
+  }
+  n_inf <- sum(is.infinite(x))
+  if (n_inf > 0L)
+    cli::cli_abort("{.arg {x_arg}} has non-finite {cli::qty(n_inf)} value{?s}.")
+  if (check_positive) {
+    n_nonpos <- sum(x <= 0, na.rm = TRUE)
+    if (n_nonpos > 0L)
+      cli::cli_abort("{.arg {x_arg}} has non-positive {cli::qty(n_nonpos)} value{?s}.")
+  }
+  if (check_nonneg) {
+    n_neg <- sum(x < 0, na.rm = TRUE)
+    if (n_neg > 0L)
+      cli::cli_abort("{.arg {x_arg}} has negative {cli::qty(n_neg)} value{?s}.")
+  }
+  if (check_whole) {
+    n_frac <- sum(x != round(x), na.rm = TRUE)
+    if (n_frac > 0L)
+      cli::cli_abort(paste("{.arg {x_arg}} has {cli::qty(n_frac)} value{?s}",
+                           "that {?is/are} not whole number{?s}."))
+  }
+  invisible(TRUE)
 }
 
 
 ## HAS_TESTS
-#' Check that an rvec of mortality probabilities is valid
+#' Check that Vector of Probalities (Possibly Rvec) is Valid
 #'
-#' Check that rvec is double and
+#' Check that rvec or double and
 #' all in [0, 1]. NAs are allowed.
 #'
-#' @param qx An rvec_dbl.
+#' @param qx An rvec or numeric vector.
+#' @param nm_qx Name to be used in error messages
 #'
 #' @returns TRUE, invisibly
 #'
 #' @noRd
-check_qx <- function(qx) {
-    if (!is.numeric(qx))
-        cli::cli_abort(c("{.arg qx} is non-numeric.",
-                         i = "{.arg qx} has class {.cls {class(qx)}}."))
-    if (rvec::is_rvec(qx))
-        qx <- as.numeric(qx)
-    n_neg <- sum(qx < 0, na.rm = TRUE)
-    if (n_neg > 0L)
-        cli::cli_abort("{.arg qx} has negative {cli::qty(n_neg)} value{?s}.")
-    n_high <- sum(qx > 1, na.rm = TRUE)
-    if (n_high > 0L)
-        cli::cli_abort("{.arg qx} has {cli::qty(n_high)} value{?s} greater than 1.")
-    invisible(TRUE)
+check_qx <- function(qx, nm_qx) {
+  if (rvec::is_rvec(qx))
+    is_numeric <- is.numeric(as.matrix(qx))
+  else
+    is_numeric <- is.numeric(qx)
+  if (!is_numeric)
+    cli::cli_abort(c("{.arg {nm_qx}} is non-numeric.",
+                     i = "{.arg {nm_qx}} has class {.cls {class(qx)}}."))
+  if (rvec::is_rvec(qx))
+    qx <- as.numeric(qx)
+  n_neg <- sum(qx < 0, na.rm = TRUE)
+  if (n_neg > 0L)
+    cli::cli_abort("{.arg {nm_qx}} has negative {cli::qty(n_neg)} value{?s}.")
+  n_high <- sum(qx > 1, na.rm = TRUE)
+  if (n_high > 0L)
+    cli::cli_abort("{.arg {nm_qx}} has {cli::qty(n_high)} value{?s} greater than 1.")
+  invisible(TRUE)
 }
 
 

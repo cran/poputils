@@ -53,7 +53,7 @@ test_that("'to_matrix' raises correct error with no measure var", {
                       KEEP.OUT.ATTRS = FALSE)
     df$z <- seq_len(nrow(df))
     expect_error(to_matrix(df, rows = a, cols = c(c, b)),
-                 "no measure variable supplied")
+                 "No measure variable supplied.")
 })
 
 test_that("'to_matrix' raises correct error with two measure vars", {
@@ -64,7 +64,7 @@ test_that("'to_matrix' raises correct error with two measure vars", {
     df$z <- seq_len(nrow(df))
     df$z2 <- seq_len(nrow(df))
     expect_error(to_matrix(df, rows = a, cols = c(c, b), measure = c(z, z2)),
-                 "attempt to select 2 measure variables")
+                 "Attempt to select 2 measure variables.")
 })
 
 test_that("'to_matrix' raises correct error with no rows var", {
@@ -74,7 +74,7 @@ test_that("'to_matrix' raises correct error with no rows var", {
                       KEEP.OUT.ATTRS = FALSE)
     df$z <- seq_len(nrow(df))
     expect_error(to_matrix(df, cols = c(c, b), measure = z),
-                 "no value supplied for 'rows'")
+                 "No value supplied for `rows`.")
 })
 
 test_that("'to_matrix' raises correct error with measure and rows overlap", {
@@ -84,7 +84,7 @@ test_that("'to_matrix' raises correct error with measure and rows overlap", {
                       KEEP.OUT.ATTRS = FALSE)
     df$z <- seq_len(nrow(df))
     expect_error(to_matrix(df, rows = a, cols = c(c, b), measure = a),
-                 "same variable \\['a'\\] selected by 'measure' and 'rows'")
+                 "Same variable selected by `measure` and `rows`: \"a\".")
 })
 
 test_that("'to_matrix' raises correct error with no cols var", {
@@ -94,7 +94,7 @@ test_that("'to_matrix' raises correct error with no cols var", {
                       KEEP.OUT.ATTRS = FALSE)
     df$z <- seq_len(nrow(df))
     expect_error(to_matrix(df, rows = c(c, b), measure = z),
-                 "no value supplied for 'cols'")
+                 "No value supplied for `cols`.")
 })
 
 test_that("'to_matrix' raises correct error with measure and cols overlap", {
@@ -104,7 +104,7 @@ test_that("'to_matrix' raises correct error with measure and cols overlap", {
                       KEEP.OUT.ATTRS = FALSE)
     df$z <- seq_len(nrow(df))
     expect_error(to_matrix(df, rows = a, cols = c(c, b), measure = c),
-                 "same variable \\['c'\\] selected by 'measure' and 'cols'")
+                 "Same variable selected by `measure` and `cols`: \"c\".")
 })
 
 test_that("'to_matrix' raises correct error when rows and cols overlap", {
@@ -114,7 +114,7 @@ test_that("'to_matrix' raises correct error when rows and cols overlap", {
                       KEEP.OUT.ATTRS = FALSE)
     df$z <- seq_len(nrow(df))
     expect_error(to_matrix(df, rows = a, cols = c(c, b, a), measure = z),
-                 "same variable \\['a'\\] selected by 'rows' and 'cols'")
+                 "Same variable selected by `rows` and `cols`: \"a\".")
 })
 
 test_that("'to_matrix' raises correct error with duplicate classif vars", {
@@ -125,7 +125,7 @@ test_that("'to_matrix' raises correct error with duplicate classif vars", {
     df$z <- seq_len(nrow(df))
     df <- rbind(df, df[1, ])
     expect_error(to_matrix(df, rows = a, cols = c(b, c), measure = z),
-                 "'x' has two rows with values c\\(a=\"a\", b=\"A\", c=\"a\"\\)")
+                 "`x` has two rows with values a=\"a\", b=\"A\", c=\"a\"\\.")
 })
 
 

@@ -392,103 +392,120 @@ check_age <- function(x,
 #' combine_age(x, to = "lt")
 #' @export
 combine_age <- function(x, to = c("five", "lt")) {
-    ## extract values
-    to <- match.arg(to)
-    limits_old <- age_limits(x)
-    lower_old <- limits_old$lower
-    upper_old <- limits_old$upper
-    open <- any(is.infinite(upper_old))
-    ## deal with degenerate cases
-    n_non_na <- sum(!is.na(x))
-    if (n_non_na == 0L)
-        return(x)
-    if ((n_non_na == 1L) && open) {
-        age_open <- lower_old[is.infinite(upper_old)][[1L]]
-        if ((to == "five") && (age_open %% 5L != 0L))
-            stop(gettextf(paste("cannot convert to %s age groups :",
-                                "open age group starts at %d"),
-                          "5-year",
-                          age_open))
-        if ((to == "lt") && (age_open %% 5L != 0L) && (age_open != 1L))
-            stop(gettextf(paste("cannot convert to %s age groups :",
-                                "open age group starts at %d"),
-                          "life table",
-                          age_open))
-        return(x)
+  ## extract values
+  to <- match.arg(to)
+  limits_old <- age_limits(x)
+  lower_old <- limits_old$lower
+  upper_old <- limits_old$upper
+  open <- any(is.infinite(upper_old))
+  ## deal with degenerate cases
+  n_non_na <- sum(!is.na(x))
+  if (n_non_na == 0L)
+    return(x)
+  if ((n_non_na == 1L) && open) {
+    age_open <- lower_old[is.infinite(upper_old)][[1L]]
+    if ((to == "five") && (age_open %% 5L != 0L))
+      stop(gettextf(paste("cannot convert to %s age groups :",
+                          "open age group starts at %d"),
+                    "5-year",
+                    age_open))
+    if ((to == "lt") && (age_open %% 5L != 0L) && (age_open != 1L))
+      stop(gettextf(paste("cannot convert to %s age groups :",
+                          "open age group starts at %d"),
+                    "life table",
+                    age_open))
+    return(x)
+  }
+  ## determine type of 'x'
+  diff_old <- upper_old - lower_old
+  diff_old <- diff_old[!is.na(diff_old)]
+  if (open)
+    diff_old <- diff_old[is.finite(diff_old)]
+  if (all(diff_old == 5L))
+    type_from <- "five"
+  else if (all(diff_old == 1L))
+    type_from <- "single"
+  else
+    type_from <- "lt"
+  ## deal with trivial or impossible conversions
+  if (type_from == to)
+    return(x)
+  if (type_from == "five")
+    stop(gettextf("cannot convert %s age groups to %s age groups",
+                  "5-year",
+                  "life table"),
+         call. = FALSE)
+  ## make new lower bounds
+  lower_min_old <- min(lower_old, na.rm = TRUE)
+  lower_max_old <- max(lower_old, na.rm = TRUE)
+  if (to == "five") {
+    lower_new <- seq.int(from = lower_min_old,
+                         to = lower_max_old,
+                         by = 5L)
+  }
+  else {
+    if (lower_min_old == 0L) {
+      lower_new <- 0L
+      if (lower_max_old >= 1L)
+        lower_new <- c(lower_new,
+                       1L)
+      if (lower_max_old >= 5L) {
+        lower_new <- c(lower_new,
+                       seq.int(from = 5L,
+                               to = lower_max_old,
+                               by = 5L))
+      }
     }
-    ## determine type of 'x'
-    diff_old <- upper_old - lower_old
-    diff_old <- diff_old[!is.na(diff_old)]
-    if (open)
-        diff_old <- diff_old[is.finite(diff_old)]
-    if (all(diff_old == 5L))
-        type_from <- "five"
-    else if (all(diff_old == 1L))
-        type_from <- "single"
-    else
-        type_from <- "lt"
-    ## deal with trivial or impossible conversions
-    if (type_from == to)
-        return(x)
-    if (type_from == "five")
-        stop(gettextf("cannot convert %s age groups to %s age groups",
-                      "5-year",
-                      "life table"),
-             call. = FALSE)
-    ## make new lower bounds
-    lower_min_old <- min(lower_old, na.rm = TRUE)
-    lower_max_old <- max(lower_old, na.rm = TRUE)
-    if (to == "five") {
-        lower_new <- seq.int(from = lower_min_old,
-                             to = lower_max_old,
-                             by = 5L)
+    else if (lower_min_old %in% 1:4) {
+      lower_new <- 1L
+      if (lower_max_old >= 5L) {
+        lower_new <- c(lower_new,
+                       seq.int(from = 5L,
+                               to = lower_max_old,
+                               by = 5L))
+      }
     }
     else {
-        if (lower_min_old == 0L) {
-            lower_new <- 0L
-            if (lower_max_old >= 1L)
-                lower_new <- c(lower_new,
-                               1L)
-            if (lower_max_old >= 5L)
-                lower_new <- c(lower_new,
-                               seq.int(from = 5L,
-                                       to = lower_max_old,
-                                       by = 5L))
-        }
-        else if (lower_min_old == 1L) {
-            lower_new <- 1L
-            if (lower_max_old >= 5L)
-                lower_new <- c(lower_new,
-                               seq.int(from = 5L,
-                                       to = lower_max_old,
-                                       by = 5L))
-        }
-        else {
-            lower_new <- seq.int(from = lower_min_old,
-                                 to = lower_max_old,
-                                 by = 5L)
-        }
+      lower_min_new <- (lower_min_old %/% 5L) * 5L
+      lower_new <- seq.int(from = lower_min_new,
+                           to = lower_max_old,
+                           by = 5L)
     }
-    ## make new labels
-    labels_new <- age_labels(type = to,
-                             min = min(lower_new),
-                             max = max(lower_new),
-                             open = open)
-    ## assign elements of 'x' to new labels
-    vec <- c(lower_new, Inf)
-    i <- findInterval(lower_old, vec)
-    ## construct result and return
-    ans <- labels_new[i]
-    if (is.factor(x)) {
-        if (NA %in% levels(x))
-            ans <- factor(ans,
-                          levels = c(labels_new, NA),
-                          exclude = character())
-        else
-            ans <- factor(ans,
-                          levels = labels_new)
+  }
+  ## make new labels
+  min <- min(lower_new)
+  max <- max(lower_new)
+  if (!open) {
+    if (to == "five")
+      max <- max + 5L
+    else {
+      if (max == 0L)
+        max <- 1L
+      else if (max == 1L)
+        max <- 5L
+      else
+        max <- max + 5L
     }
-    ans
+  }
+  labels_new <- age_labels(type = to,
+                           min = min,
+                           max = max,
+                           open = open)
+  ## assign elements of 'x' to new labels
+  vec <- c(lower_new, Inf)
+  i <- findInterval(lower_old, vec)
+  ## construct result and return
+  ans <- labels_new[i]
+  if (is.factor(x)) {
+    if (NA %in% levels(x))
+      ans <- factor(ans,
+                    levels = c(labels_new, NA),
+                    exclude = character())
+    else
+      ans <- factor(ans,
+                    levels = labels_new)
+  }
+  ans
 }
 
 

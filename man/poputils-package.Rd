@@ -15,44 +15,52 @@ at end-users, and others at developers.
 
 \strong{Data manipulation}
 \itemize{
-\item \code{\link[=logit]{logit()}},\code{\link[=invlogit]{invlogit()}} Logistic transformation.
+\item \code{\link[=logit]{logit()}},\code{\link[=invlogit]{invlogit()}} Logistic transformation
+\item \code{\link[=trim_01]{trim_01()}} Trim values to interval (0, 1)
+\item \code{\link[=rr3]{rr3()}} Randomly round to base 3
 }
 
 \strong{Labels}
 \itemize{
 \item \code{\link[=age_labels]{age_labels()}} Create age labels.
-\item \code{\link[=age_lower]{age_lower()}}, \code{\link[=age_mid]{age_mid()}}, \code{\link[=age_upper]{age_upper()}} Limits and midpoints of age groups.
-\item \code{\link[=combine_age]{combine_age()}} Merge age group labels.
-\item \code{\link[=reformat_age]{reformat_age()}} Reformat age group labels.
-\item \code{\link[=reformat_sex]{reformat_sex()}} Reformat sex labels.
-\item \code{\link[=set_age_open]{set_age_open()}} Specify oldest age group.
+\item \code{\link[=age_lower]{age_lower()}}, \code{\link[=age_mid]{age_mid()}}, \code{\link[=age_upper]{age_upper()}} Limits and midpoints of age groups
+\item \code{\link[=combine_age]{combine_age()}} Merge age group labels
+\item \code{\link[=reformat_age]{reformat_age()}} Reformat age group labels
+\item \code{\link[=reformat_sex]{reformat_sex()}} Reformat sex labels
+\item \code{\link[=set_age_open]{set_age_open()}} Specify oldest age group
 }
 
 \strong{Life expectancy, life tables}
 \itemize{
 \item \code{ex_to_lifetab_brass()} Brass logit model.
-\item \code{\link[=lifeexp]{lifeexp()}} Life expectancy.
-\item \code{\link[=lifetab]{lifetab()}} Full life table.
+\item \code{\link[=lifeexp]{lifeexp()}} Life expectancy
+\item \code{\link[=lifetab]{lifetab()}} Full life table
+\item \code{\link[=q0_to_m0]{q0_to_m0()}} Infant mortality
 }
 }
 
 \section{For developers}{
 
 
+\strong{Checking arguments}
+\itemize{
+\item \code{\link[=check_n]{check_n()}} Check an integer scalar
+}
+
 \strong{Data manipulation}
 \itemize{
-\item \code{\link[=check_no_overlap_colnums]{check_no_overlap_colnums()}} Checking for argument clash.
-\item \code{\link[=groups_colnums]{groups_colnums()}} Get column numbers for grouping variables.
-\item \code{\link[=matrix_to_list_of_cols]{matrix_to_list_of_cols()}}, \code{\link[=matrix_to_list_of_rows]{matrix_to_list_of_rows()}} Split matrix.
-\item \code{\link[=to_matrix]{to_matrix()}} Convert data frame to matrix.
+\item \code{\link[=check_no_overlap_colnums]{check_no_overlap_colnums()}} Checking for argument clash
+\item \code{\link[=groups_colnums]{groups_colnums()}} Get column numbers for grouping variables
+\item \code{\link[=matrix_to_list_of_cols]{matrix_to_list_of_cols()}}, \code{\link[=matrix_to_list_of_rows]{matrix_to_list_of_rows()}} Split matrix
+\item \code{\link[=to_matrix]{to_matrix()}} Convert data frame to matrix
 }
 
 \strong{Labels}
 \itemize{
-\item \code{\link[=age_group_type]{age_group_type()}} Infer type of age group label.
-\item \code{\link[=check_age]{check_age()}} Validity checks for age group labels.
-\item \code{\link[=find_label_female]{find_label_female()}}, \code{\link[=find_label_male]{find_label_male()}} Identify sex or gender labels.
-\item \code{\link[=find_var_age]{find_var_age()}}, \code{\link[=find_var_sexgender]{find_var_sexgender()}}, \code{\link[=find_var_time]{find_var_time()}} Identify age, sex/gender, time variables.
+\item \code{\link[=age_group_type]{age_group_type()}} Infer type of age group label
+\item \code{\link[=check_age]{check_age()}} Validity checks for age group labels
+\item \code{\link[=find_label_female]{find_label_female()}}, \code{\link[=find_label_male]{find_label_male()}} Identify sex or gender labels
+\item \code{\link[=find_var_age]{find_var_age()}}, \code{\link[=find_var_sexgender]{find_var_sexgender()}}, \code{\link[=find_var_time]{find_var_time()}} Identify age, sex/gender, time variables
 }
 }
 

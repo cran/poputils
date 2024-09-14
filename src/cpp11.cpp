@@ -75,6 +75,13 @@ extern "C" SEXP _poputils_qx_to_Lx(SEXP qx, SEXP age_group_categ, SEXP sex, SEXP
     return cpp11::as_sexp(qx_to_Lx(cpp11::as_cpp<cpp11::decay_t<cpp11::doubles_matrix<>>>(qx), cpp11::as_cpp<cpp11::decay_t<strings>>(age_group_categ), cpp11::as_cpp<cpp11::decay_t<strings>>(sex), cpp11::as_cpp<cpp11::decay_t<doubles>>(ax), cpp11::as_cpp<cpp11::decay_t<strings>>(methods)));
   END_CPP11
 }
+// lifetab.cpp
+writable::doubles_matrix<> q0_to_m0_inner(cpp11::doubles_matrix<> q0, strings sex, doubles a0, strings infant);
+extern "C" SEXP _poputils_q0_to_m0_inner(SEXP q0, SEXP sex, SEXP a0, SEXP infant) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(q0_to_m0_inner(cpp11::as_cpp<cpp11::decay_t<cpp11::doubles_matrix<>>>(q0), cpp11::as_cpp<cpp11::decay_t<strings>>(sex), cpp11::as_cpp<cpp11::decay_t<doubles>>(a0), cpp11::as_cpp<cpp11::decay_t<strings>>(infant)));
+  END_CPP11
+}
 // logit.cpp
 writable::doubles logit_inner(doubles p);
 extern "C" SEXP _poputils_logit_inner(SEXP p) {
@@ -101,6 +108,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_poputils_mx_to_Lx",       (DL_FUNC) &_poputils_mx_to_Lx,       5},
     {"_poputils_mx_to_ex",       (DL_FUNC) &_poputils_mx_to_ex,       5},
     {"_poputils_mx_to_lx",       (DL_FUNC) &_poputils_mx_to_lx,       5},
+    {"_poputils_q0_to_m0_inner", (DL_FUNC) &_poputils_q0_to_m0_inner, 4},
     {"_poputils_qx_to_Lx",       (DL_FUNC) &_poputils_qx_to_Lx,       5},
     {"_poputils_qx_to_ex",       (DL_FUNC) &_poputils_qx_to_ex,       5},
     {"_poputils_qx_to_lx",       (DL_FUNC) &_poputils_qx_to_lx,       1},

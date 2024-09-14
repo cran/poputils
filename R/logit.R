@@ -44,7 +44,11 @@
 #' invlogit(logit(p))
 #' @export
 logit <- function(p) {
-  if (!is.numeric(p))
+  if (rvec::is_rvec(p))
+    is_numeric <- is.numeric(as.matrix(p))
+  else
+    is_numeric <- is.numeric(p)
+  if (!is_numeric)
     cli::cli_abort(c("{.arg p} is not numeric.",
                      i = "{.arg p} has class {.cls {class(p)}}."))
   if (rvec::is_rvec(p)) {
@@ -69,7 +73,11 @@ logit <- function(p) {
 #' @export
 #' @rdname logit
 invlogit <- function(x) {
-  if (!is.numeric(x))
+  if (rvec::is_rvec(x))
+    is_numeric <- is.numeric(as.matrix(x))
+  else
+    is_numeric <- is.numeric(x)
+  if (!is_numeric)
     cli::cli_abort(c("{.arg x} is not numeric.",
                      i = "{.arg x} has class {.cls {class(x)}}."))
   if (rvec::is_rvec(x)) {
