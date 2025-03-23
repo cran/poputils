@@ -1,20 +1,38 @@
 
-## 'check_at_in_age' ----------------------------------------------------------
+## 'check_at' -----------------------------------------------------------------
 
-test_that("'check_at_in_age' returns TRUE with valid inputs", {
+test_that("'check_at' returns TRUE with valid inputs", {
   age <- c("10+", "1-4", "0", "5-9")
-  expect_true(check_at_in_age(at = 0, age = age))
-  expect_true(check_at_in_age(at = 1, age = age))
-  expect_true(check_at_in_age(at = 5, age = age))
-  expect_true(check_at_in_age(at = 10, age = age))
+  expect_true(check_at(at = 0, age = age))
+  expect_true(check_at(at = c(0, 1, 5, 10), age = age))
 })
 
-test_that("'check_at_in_age' throws correct error with invalid inputs", {
+
+test_that("'check_at' throws correct error with 'at' non-numeric", {
   age <- c("10+", "1-4", "0", "5-9")
-  expect_error(check_at_in_age(at = 2, age = age),
+  expect_error(check_at(at = "2", age = age),
+               "`at` is non-numeric.")
+})
+
+test_that("'check_at' throws correct error with 'at' length 0", {
+  age <- c("10+", "1-4", "0", "5-9")
+  expect_error(check_at(at = integer(), age = age),
+               "`at` has length 0.")
+})
+
+test_that("'check_at' throws correct error with 'at' has NA", {
+  age <- c("10+", "1-4", "0", "5-9")
+  expect_error(check_at(at = c(0, NA), age = age),
+               "`at` has NA.")
+  expect_error(check_at(at = c(0, NA, 5, NA), age = age),
+               "`at` has NAs.")
+})
+
+test_that("'check_at' throws correct error with 'at' not lower limit of 'age'", {
+  age <- c("10+", "1-4", "0", "5-9")
+  expect_error(check_at(at = 2, age = age),
                "Invalid value for `at`.")
 })
-
 
 
 ## 'check_at_most_one_colnum' -------------------------------------------------
@@ -225,6 +243,32 @@ test_that("'check_life_colnums' returns correct error with by, groups clash", {
                                     by_colnums = c(strata = 7L),
                                     groups_colnums = c(region = 5L, time = 4L)),
                  "Can't supply `by` when `data` is a grouped data frame.")
+})
+
+test_that("'check_life_colnums' returns correct error when mx, by clash", {
+    empty_colnum <- integer()
+    names(empty_colnum) <- character()
+    expect_error(check_life_colnums(mx_colnum = c(mx = 1L),
+                                    qx_colnum = empty_colnum,
+                                    age_colnum = c(AGE = 3L),
+                                    sex_colnum = empty_colnum,
+                                    ax_colnum = c(AX = 2L),
+                                    by_colnums = c(strata = 7L, mx = 1L),
+                                    groups_colnums = empty_colnum),
+                 "`mx` and `by` use the same variable.")
+})
+
+test_that("'check_life_colnums' returns correct error when sex, groups clash", {
+    empty_colnum <- integer()
+    names(empty_colnum) <- character()
+    expect_error(check_life_colnums(mx_colnum = c(mx = 1L),
+                                    qx_colnum = empty_colnum,
+                                    age_colnum = c(AGE = 3L),
+                                    sex_colnum = empty_colnum,
+                                    ax_colnum = c(AX = 2L),
+                                    by_colnums = empty_colnum,
+                                    groups_colnums = c(strata = 7L, mx = 1L)),
+                 "`mx` and `groups` use the same variable.")
 })
 
 
@@ -738,8 +782,7 @@ test_that("'check_sex_not_needed' returns correct error when methods do require 
     expect_error(check_sex_not_needed(methods),
                  "`child` is \"CD\" but no value supplied for `sex`")
 })
-
-    
+ 
 
 ## 'check_standard' -----------------------------------------------------------
 
@@ -905,6 +948,71 @@ test_that("'check_target_ex_to_lifetab_brass' throws expected error when no inde
                  "`target` does not have index variables.")
 })
 
+
+## 'check_tfr_colnums' -------------------------------------------------------
+
+test_that("'check_tfr_colnums' returns TRUE with valid inputs - no groups", {
+    empty_colnum <- integer()
+    names(empty_colnum) <- character()
+    expect_true(check_tfr_colnums(asfr_colnum = c(asfr = 1L),
+                                   age_colnum = c(AGE = 3L),
+                                   sex_colnum = empty_colnum,
+                                   by_colnums = c(region = 5L, time = 4L),
+                                   groups_colnums = empty_colnum))
+})
+
+test_that("'check_tfr_colnums' returns correct error when no asfr", {
+  empty_colnum <- integer()
+  expect_error(check_tfr_colnums(asfr_colnum = empty_colnum,
+                                 age_colnum = c(AGE = 3L),
+                                 sex_colnum = empty_colnum,
+                                 by_colnums = c(region = 5L, time = 4L),
+                                 groups_colnums = empty_colnum),
+               "No value supplied for `asfr`.")
+})
+
+test_that("'check_tfr_colnums' returns correct error when no age", {
+  empty_colnum <- integer()
+  expect_error(check_tfr_colnums(asfr_colnum = c(asfr = 3L),
+                                 age_colnum = empty_colnum,
+                                 sex_colnum = empty_colnum,
+                                 by_colnums = c(region = 5L, time = 4L),
+                                 groups_colnums = empty_colnum),
+               "No value supplied for `age`.")
+})
+
+test_that("'check_tfr_colnums' returns correct error with by, groups clash", {
+  empty_colnum <- integer()
+  names(empty_colnum) <- character()
+  expect_error(check_tfr_colnums(asfr_colnum = c(asfr = 1L),
+                                 age_colnum = c(AGE = 3L),
+                                 sex_colnum = empty_colnum,
+                                 by_colnums = c(strata = 7L),
+                                 groups_colnums = c(region = 5L, time = 4L)),
+               "Can't supply `by` when `data` is a grouped data frame.")
+})
+
+test_that("'check_tfr_colnums' returns correct error when asfr, by clash", {
+    empty_colnum <- integer()
+    names(empty_colnum) <- character()
+    expect_error(check_tfr_colnums(asfr_colnum = c(asfr = 1L),
+                                    age_colnum = c(AGE = 3L),
+                                    sex_colnum = empty_colnum,
+                                    by_colnums = c(strata = 7L, asfr = 1L),
+                                    groups_colnums = empty_colnum),
+                 "`asfr` and `by` use the same variable.")
+})
+
+test_that("'check_tfr_colnums' returns correct error when asfr, groups clash", {
+  empty_colnum <- integer()
+  names(empty_colnum) <- character()
+  expect_error(check_tfr_colnums(asfr_colnum = c(asfr = 1L),
+                                 age_colnum = c(AGE = 3L),
+                                 sex_colnum = empty_colnum,
+                                 by_colnums = empty_colnum,
+                                 groups_colnums = c(strata = 7L, asfr = 1L)),
+               "`asfr` and `groups` use the same variable.")
+})
 
 
 ## 'check_valid_colnum_list' --------------------------------------------------

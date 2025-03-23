@@ -1,4 +1,32 @@
 
+# poputils 0.4.0
+
+## Interface
+
+* If `data` already contains columns called `"lx"`, `"Lx"`, `"dx"`,
+  `"ex"`, then `lifetab()` overwrites these columns, with a message,
+  rather than creating new versions.
+* `at` argument to `lifeexp()` can now be a vector with length
+  > 1. In this case, `lifeexp()` calculates life expectancy for each
+  value (within each combination of the 'by' variables, if present.)
+* Added `n_core` argument to `lifetab()` and `lifeexp()`. Setting
+  `n_core` to a value greater than 1 triggers parallel processing.
+* Added `closed` argument to `check_age()`, to check whether the
+  oldest age group is closed.
+* Added function `tfr()` for calculating total fertility rates.
+* Extended vignette.
+
+
+## Bug fixes
+
+* `combine_age()` previously not working properly if `"to"` is
+  `"five"`, and lower limit of youngest age group in `x` not divisible
+  by 5.
+* `ex_to_lifetab_brass()` previously assumed, without checking that
+  age groups were correctly ordered. `ex_to_lifetab_brass()` now
+  automatically reorders them.
+
+
 # poputils 0.3.3
 
 ## Bug fixes

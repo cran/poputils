@@ -4,7 +4,14 @@
 \alias{check_age}
 \title{Validity Checks for Age Labels}
 \usage{
-check_age(x, complete = FALSE, unique = FALSE, zero = FALSE, open = FALSE)
+check_age(
+  x,
+  complete = FALSE,
+  unique = FALSE,
+  zero = FALSE,
+  open = FALSE,
+  closed = FALSE
+)
 }
 \arguments{
 \item{x}{A vector of age labels.}
@@ -22,6 +29,10 @@ test whether youngest age group in
 \item{open}{If \code{TRUE},
 test whether oldest age group in \code{x}
 is open.}
+
+\item{closed}{If \code{TRUE},
+test whether oldest age group in \code{x}
+is closed.}
 }
 \value{
 \code{TRUE}, invisibly, or raises an
@@ -49,9 +60,11 @@ are not (because they are missing \code{"10-14"}.)
 \item \code{unique}. Whether \code{x} has duplicated labels.
 \item \code{zero}. Whether the youngest age group in \code{x} starts
 at age 0, ie whether it includes \code{"0"} or \code{"0-4"}.
-\item \code{open}. Whether the oldest age group in \code{x} has an "open"
-age group, such as \code{"100+"} or \code{"65+"}, that has no
-upper limit.
+\item \code{open}. Whether the oldest age group in \code{x} is "open",
+with no upper limit, eg \code{"100+"} or \code{"65+"}.
+\item \code{closed}. Whether the oldest age group in \code{x}
+is "closed", with an upper limit,
+eg \code{"100-104+"} or \code{"65"}.
 }
 }
 \examples{
@@ -73,6 +86,11 @@ try(
 try(
   check_age(c("10-14", "0-4", "5-9"),
             open = TRUE)
+)
+
+try(
+  check_age(c("10+", "0-4", "5-9"),
+            closed = TRUE)
 )
 }
 \seealso{

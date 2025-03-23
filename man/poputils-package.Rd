@@ -32,10 +32,15 @@ at end-users, and others at developers.
 
 \strong{Life expectancy, life tables}
 \itemize{
-\item \code{ex_to_lifetab_brass()} Brass logit model.
+\item \code{\link[=ex_to_lifetab_brass]{ex_to_lifetab_brass()}} Brass logit model.
 \item \code{\link[=lifeexp]{lifeexp()}} Life expectancy
 \item \code{\link[=lifetab]{lifetab()}} Full life table
 \item \code{\link[=q0_to_m0]{q0_to_m0()}} Infant mortality
+}
+
+** Fertility**
+\itemize{
+\item \code{\link[=tfr]{tfr()}} Total fertility rate
 }
 }
 

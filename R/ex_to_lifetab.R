@@ -254,80 +254,82 @@ ex_to_lifetab_brass_one <- function(val,
                                     methods,
                                     radix,
                                     suffix) {
-    l <- make_ex_beta_n_draw(ex = val$ex[[1L]],
-                             beta = val$beta[[1L]])
-    ex <- l$ex
-    beta <- l$beta
-    n_draw <- l$n_draw
-    sex <- make_sex_ex_to_lifetab(sex = sex,
-                                  methods = methods,
-                                  nm_data = "standard")
-    sex_rep <- if (is.null(n_draw)) sex else rep(sex, each = n_draw)
-    lx_standard <- val$lx
-    lx_standard <- lx_standard / lx_standard[[1L]]
-    logit_lx_standard <- logit(lx_standard)
-    age <- val$age
-    age_group_categ <- age_group_categ(age)
-    ax <- val$ax
-    ## closure capturing 'logit_lx_standard',
-    ## 'age_group_categ', 'ax', and 'methods'
-    alpha_to_ex <- function(alpha, beta_i, sex_i) {
-        logit_lx <- alpha + beta_i * logit_lx_standard
-        lx <- invlogit_inner(logit_lx)
-        qx <- lx_to_qx(lx)
-        qx_to_ex(qx = qx,
-                 age_group_categ = age_group_categ,
-                 sex = sex_i,
-                 ax = ax,
-                 methods = methods)
+  ord <- order(age_lower(val$age))
+  val <- val[ord, , drop = FALSE]
+  l <- make_ex_beta_n_draw(ex = val$ex[[1L]],
+                           beta = val$beta[[1L]])
+  ex <- l$ex
+  beta <- l$beta
+  n_draw <- l$n_draw
+  sex <- make_sex_ex_to_lifetab(sex = sex,
+                                methods = methods,
+                                nm_data = "standard")
+  sex_rep <- if (is.null(n_draw)) sex else rep(sex, each = n_draw)
+  lx_standard <- val$lx
+  lx_standard <- lx_standard / lx_standard[[1L]]
+  logit_lx_standard <- logit(lx_standard)
+  age <- val$age
+  age_group_categ <- age_group_categ(age)
+  ax <- val$ax
+  ## closure capturing 'logit_lx_standard',
+  ## 'age_group_categ', 'ax', and 'methods'
+  alpha_to_ex <- function(alpha, beta_i, sex_i) {
+    logit_lx <- alpha + beta_i * logit_lx_standard
+    lx <- invlogit_inner(logit_lx)
+    qx <- lx_to_qx(lx)
+    qx_to_ex(qx = qx,
+             age_group_categ = age_group_categ,
+             sex = sex_i,
+             ax = ax,
+             methods = methods)
+  }
+  n_val <- length(ex)
+  lx_ans <- vector(mode = "list", length = n_val)
+  for (i in seq_len(n_val)) {
+    ex_i <- ex[[i]]
+    beta_i <- beta[[i]]
+    sex_i <- sex_rep[[i]]
+    ## closure capturing 'beta_i', 'sex_i'
+    abs_error <- function(alpha) {
+      ex_derived <- alpha_to_ex(alpha = alpha,
+                                beta = beta_i,
+                                sex = sex_i)
+      abs(ex_derived - ex_i)
     }
-    n_val <- length(ex)
-    lx_ans <- vector(mode = "list", length = n_val)
-    for (i in seq_len(n_val)) {
-        ex_i <- ex[[i]]
-        beta_i <- beta[[i]]
-        sex_i <- sex_rep[[i]]
-        ## closure capturing 'beta_i', 'sex_i'
-        abs_error <- function(alpha) {
-            ex_derived <- alpha_to_ex(alpha = alpha,
-                                      beta = beta_i,
-                                      sex = sex_i)
-            abs(ex_derived - ex_i)
-        }
-        val_optim <- stats::optimize(f = abs_error, interval = c(-10, 10))
-        alpha_min_i <- val_optim$minimum
-        logit_lx_i <- alpha_min_i + beta_i * logit_lx_standard
-        lx_i <- invlogit(logit_lx_i)
-        lx_ans[[i]] <- lx_i
-    }
-    has_draws <- !is.null(n_draw)
-    if (has_draws) {
-        n_by <- n_val %/% n_draw
-        n_age <- length(age)
-        lx_ans <- array(unlist(lx_ans), dim = c(n_age, n_by, n_draw))
-        lx_ans <- apply(lx_ans, 2L, matrix, nrow = n_age, ncol = n_draw, simplify = FALSE)
-    }
-    ans <- vector(mode = "list", length = length(lx_ans))
-    for (i in seq_along(ans)) {
-        lx <- lx_ans[[i]]
-        qx <- lx_to_qx(lx)
-        lifetab <- qx_to_lifetab(qx = qx,
-                                 age_group_categ = age_group_categ,
-                                 sex = sex_rep[[i]],
-                                 ax = ax,
-                                 methods = methods,
-                                 radix = radix,
-                                 suffix = suffix)
-        if (has_draws)
-            lifetab <- lapply(lifetab, rvec::rvec_dbl)
-        else
-            lifetab <- lapply(lifetab, as.double)
-        lifetab <- tibble::as_tibble(lifetab)
-        lifetab <- tibble::tibble(age = age, lifetab)
-        ans[[i]] <- lifetab
-    }
-    ans <- vctrs::vec_rbind(!!!ans)
-    ans
+    val_optim <- stats::optimize(f = abs_error, interval = c(-10, 10))
+    alpha_min_i <- val_optim$minimum
+    logit_lx_i <- alpha_min_i + beta_i * logit_lx_standard
+    lx_i <- invlogit(logit_lx_i)
+    lx_ans[[i]] <- lx_i
+  }
+  has_draws <- !is.null(n_draw)
+  if (has_draws) {
+    n_by <- n_val %/% n_draw
+    n_age <- length(age)
+    lx_ans <- array(unlist(lx_ans), dim = c(n_age, n_by, n_draw))
+    lx_ans <- apply(lx_ans, 2L, matrix, nrow = n_age, ncol = n_draw, simplify = FALSE)
+  }
+  ans <- vector(mode = "list", length = length(lx_ans))
+  for (i in seq_along(ans)) {
+    lx <- lx_ans[[i]]
+    qx <- lx_to_qx(lx)
+    lifetab <- qx_to_lifetab(qx = qx,
+                             age_group_categ = age_group_categ,
+                             sex = sex_rep[[i]],
+                             ax = ax,
+                             methods = methods,
+                             radix = radix,
+                             suffix = suffix)
+    if (has_draws)
+      lifetab <- lapply(lifetab, rvec::rvec_dbl)
+    else
+      lifetab <- lapply(lifetab, as.double)
+    lifetab <- tibble::as_tibble(lifetab)
+    lifetab <- tibble::tibble(age = age, lifetab)
+    ans[[i]] <- lifetab
+  }
+  ans <- vctrs::vec_rbind(!!!ans)
+  ans
 }
 
 

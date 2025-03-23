@@ -111,6 +111,14 @@
 #' through to the life table values, which will
 #' also be rvecs.
 #'
+#' @section Parallel processing:
+#'
+#' Calculations can be slow when working
+#' with rvecs and many combinations of 'by' variables.
+#' In these cases, setting `n_core` to a number
+#' greater than 1, which triggers parallel processing,
+#' may help.
+#'
 #' @param data Data frame with mortality data.
 #' @param mx <[`tidyselect`][tidyselect::language]>
 #' Mortality rates, expressed as deaths per 
@@ -120,6 +128,7 @@
 #' An alternative to `mx`. Possibly an [rvec][rvec::rvec()].
 #' @param at Age at which life expectancy is calculated
 #' (`lifeexp() only). Default is `0`.
+#' Can be a vector with length > 1.
 #' @param age <[`tidyselect`][tidyselect::language]>
 #' Age group labels. The labels must be
 #' interpretable by functions
@@ -164,12 +173,16 @@
 #' `lx` column. Default is `100000`.
 #' @param suffix Optional suffix added to new
 #' columns in result.
+#' @param n_core Number of cores to use for parallel
+#' processing. If `n_core` is `1` (the default),
+#' no parallel processing is done.
 #'
 #' @returns A [tibble][tibble::tibble()].
 #'
 #' @seealso
 #' - [ex_to_lifetab_brass()] Calculate life table from minimal inputs
 #' - [q0_to_m0()] Convert between infant mortality measures
+#' - [tfr()] Calculate total fertility rate
 #'
 #' @references
 #' - Preston SH, Heuveline P, and Guillot M. 2001.
@@ -237,6 +250,13 @@
 #'   lifeexp(mx = mx,
 #'           at = 60,
 #'           sex = sex)
+#'
+#' ## life expectancy at ages 0 and 60
+#' west_lifetab |>
+#'   filter(level == 10) |>
+#'   lifeexp(mx = mx,
+#'           at = c(0, 60),
+#'           sex = sex)
 #' @export
 lifetab <- function(data,
                     mx = NULL,
@@ -250,7 +270,8 @@ lifetab <- function(data,
                     closed = c("constant", "linear"),
                     open = "constant",
                     radix = 100000,
-                    suffix = NULL) {
+                    suffix = NULL,
+                    n_core = 1) {
     mx_quo <- rlang::enquo(mx)
     qx_quo <- rlang::enquo(qx)
     age_quo <- rlang::enquo(age)
@@ -276,7 +297,8 @@ lifetab <- function(data,
                methods = methods,
                radix = radix,
                suffix = suffix,
-               is_table = TRUE)
+               is_table = TRUE,
+               n_core = n_core)
 }
 
 
@@ -294,33 +316,35 @@ lifeexp <- function(data,
                     child = c("constant", "linear", "CD"),
                     closed = c("constant", "linear"),
                     open = "constant",
-                    suffix = NULL) {
-    mx_quo <- rlang::enquo(mx)
-    qx_quo <- rlang::enquo(qx)
-    age_quo <- rlang::enquo(age)
-    sex_quo <- rlang::enquo(sex)
-    ax_quo <- rlang::enquo(ax)
-    by_quo <- rlang::enquo(by)
-    infant <- match.arg(infant)
-    child <- match.arg(child)
-    closed <- match.arg(closed)
-    open <- match.arg(open)
-    methods <- c(infant = infant,
-                 child = child,
-                 closed = closed,
-                 open = open)
-    life_inner(data = data,
-               mx_quo = mx_quo,
-               qx_quo = qx_quo,
-               at = at,
-               age_quo = age_quo,
-               sex_quo = sex_quo,
-               ax_quo = ax_quo,
-               by_quo = by_quo,
-               methods = methods,
-               radix = 1,
-               suffix = suffix,
-               is_table = FALSE)
+                    suffix = NULL,
+                    n_core = 1) {
+  mx_quo <- rlang::enquo(mx)
+  qx_quo <- rlang::enquo(qx)
+  age_quo <- rlang::enquo(age)
+  sex_quo <- rlang::enquo(sex)
+  ax_quo <- rlang::enquo(ax)
+  by_quo <- rlang::enquo(by)
+  infant <- match.arg(infant)
+  child <- match.arg(child)
+  closed <- match.arg(closed)
+  open <- match.arg(open)
+  methods <- c(infant = infant,
+               child = child,
+               closed = closed,
+               open = open)
+  life_inner(data = data,
+             mx_quo = mx_quo,
+             qx_quo = qx_quo,
+             at = at,
+             age_quo = age_quo,
+             sex_quo = sex_quo,
+             ax_quo = ax_quo,
+             by_quo = by_quo,
+             methods = methods,
+             radix = 1,
+             suffix = suffix,
+             is_table = FALSE,
+             n_core = n_core)
 }
 
 
@@ -436,6 +460,8 @@ get_methods_need_sex <- function() c("CD", "AK")
 #' calculation methods
 #' @param radix Initial population for 'lx'
 #' @param suffix Suffix added to new columns
+#' @param n_core Number of cores for parallel
+#' processing
 #'
 #' @returns A tibble
 #'
@@ -451,61 +477,46 @@ life_inner <- function(data,
                        methods,
                        radix,
                        suffix,
-                       is_table) {
-    if (!is.data.frame(data))
-        cli::cli_abort(c("{.arg data} is not a data frame.",
-                         i = "{.arg data} has class {.cls {class(data)}}."))
-    mx_colnum <- tidyselect::eval_select(mx_quo, data = data)
-    qx_colnum <- tidyselect::eval_select(qx_quo, data = data)
-    age_colnum <- tidyselect::eval_select(age_quo, data = data)
-    sex_colnum <- tidyselect::eval_select(sex_quo, data = data)
-    ax_colnum <- tidyselect::eval_select(ax_quo, data = data)
-    by_colnums <- tidyselect::eval_select(by_quo, data = data)
-    groups_colnums <- groups_colnums(data)
-    check_life_colnums(mx_colnum = mx_colnum,
-                       qx_colnum = qx_colnum,
-                       age_colnum = age_colnum,
-                       sex_colnum = sex_colnum,
-                       ax_colnum = ax_colnum,
-                       by_colnums = by_colnums,
-                       groups_colnums = groups_colnums)
-    is_sex_supplied <- length(sex_colnum) > 0L
-    is_by_supplied <- length(by_colnums) > 0L
-    is_groups_supplied <- length(groups_colnums) > 0L
-    if (is_by_supplied)
-        by_colnums <- unique(c(by_colnums, sex_colnum))
-    else
-        by_colnums <- unique(c(groups_colnums, sex_colnum))
-    has_by <- length(by_colnums) > 0L
-    if (has_by) {
-        inputs <- vctrs::vec_split(x = data,
-                                   by = data[by_colnums])
-        for (i in seq_len(nrow(inputs))) {
-            return_val <- tryCatch(life_inner_one(data = inputs$val[[i]],
-                                                  mx_colnum = mx_colnum,
-                                                  qx_colnum = qx_colnum,
-                                                  at = at,
-                                                  age_colnum = age_colnum,
-                                                  sex_colnum = sex_colnum,
-                                                  ax_colnum = ax_colnum,
-                                                  methods = methods,
-                                                  radix = radix,
-                                                  suffix = suffix,
-                                                  is_table = is_table),
-                                   error = function(cnd) {
-                                       str_key <- make_str_key(inputs$key[i, , drop = FALSE])
-                                       msg1 <- "Problem calculating life table functions."
-                                       msg2 <- paste("Problem occurred where", str_key)
-                                       cli::cli_abort(c(msg1, i = msg2), parent = cnd)
-                                   })
-            inputs$val[[i]] <- return_val
-        }
-        ans <- do.call(vctrs::vec_rbind, inputs$val)
-        if (!is_table)
-            ans <- vctrs::vec_cbind(inputs$key, ans)
-    }
-    else {
-        ans <- life_inner_one(data = data,
+                       is_table,
+                       n_core) {
+  if (!is.data.frame(data))
+    cli::cli_abort(c("{.arg data} is not a data frame.",
+                     i = "{.arg data} has class {.cls {class(data)}}."))
+  mx_colnum <- tidyselect::eval_select(mx_quo, data = data)
+  qx_colnum <- tidyselect::eval_select(qx_quo, data = data)
+  age_colnum <- tidyselect::eval_select(age_quo, data = data)
+  sex_colnum <- tidyselect::eval_select(sex_quo, data = data)
+  ax_colnum <- tidyselect::eval_select(ax_quo, data = data)
+  by_colnums <- tidyselect::eval_select(by_quo, data = data)
+  groups_colnums <- groups_colnums(data)
+  check_life_colnums(mx_colnum = mx_colnum,
+                     qx_colnum = qx_colnum,
+                     age_colnum = age_colnum,
+                     sex_colnum = sex_colnum,
+                     ax_colnum = ax_colnum,
+                     by_colnums = by_colnums,
+                     groups_colnums = groups_colnums)
+  data <- remove_existing_lifetab_cols(data = data,
+                                       is_table = is_table,
+                                       suffix = suffix)
+  is_sex_supplied <- length(sex_colnum) > 0L
+  is_by_supplied <- length(by_colnums) > 0L
+  is_groups_supplied <- length(groups_colnums) > 0L
+  if (is_by_supplied)
+    by_colnums <- unique(c(by_colnums, sex_colnum))
+  else
+    by_colnums <- unique(c(groups_colnums, sex_colnum))
+  has_by <- length(by_colnums) > 0L
+  if (has_by) {
+    inputs <- vctrs::vec_split(x = data,
+                               by = data[by_colnums])
+    check_n(n = n_core,
+            nm_n = "n_core",
+            min = 1L,
+            max = NULL,
+            divisible_by = NULL)
+    life_by <- function(val, key) {
+      tryCatch(life_inner_one(data = val,
                               mx_colnum = mx_colnum,
                               qx_colnum = qx_colnum,
                               at = at,
@@ -515,9 +526,49 @@ life_inner <- function(data,
                               methods = methods,
                               radix = radix,
                               suffix = suffix,
-                              is_table = is_table)
+                              is_table = is_table),
+               error = function(cnd) {
+                 str_key <- make_str_key(key)
+                 msg1 <- "Problem calculating life table functions."
+                 msg2 <- paste("Problem occurred where", str_key)
+                 cli::cli_abort(c(msg1, i = msg2), parent = cnd)
+               })
     }
-    ans
+    vals <- inputs$val
+    key <- inputs$key
+    keys <- lapply(nrow(key), function(i) key[i, , drop = FALSE])
+    if (n_core > 1L) {
+      iseed <- sample.int(n = .Machine$integer.max, size = 1L)
+      cl <- parallel::makeCluster(n_core)
+      on.exit(parallel::stopCluster(cl))
+      parallel::clusterSetRNGStream(cl, iseed = iseed)
+      ans <- parallel::clusterMap(cl = cl, fun = life_by, val = vals, key = keys)
+    }
+    else
+      ans <- .mapply(FUN = life_by,
+                     dots = list(val = vals, key = keys),
+                     MoreArgs = list())
+    ans <- vctrs::vec_rbind(!!!ans)
+    if (!is_table) {
+      n_at <- length(at)
+      key <- vctrs::vec_rep_each(key, times = n_at)
+      ans <- vctrs::vec_cbind(key, ans)
+    }
+  }
+  else {
+    ans <- life_inner_one(data = data,
+                          mx_colnum = mx_colnum,
+                          qx_colnum = qx_colnum,
+                          at = at,
+                          age_colnum = age_colnum,
+                          sex_colnum = sex_colnum,
+                          ax_colnum = ax_colnum,
+                          methods = methods,
+                          radix = radix,
+                          suffix = suffix,
+                          is_table = is_table)
+  }
+  ans
 }
 
 
@@ -558,22 +609,17 @@ life_inner_one <- function(data,
                            radix,
                            suffix,
                            is_table) {
-  n <- nrow(data)
-  check_duplicated_age(data[[age_colnum]])
-  check_n(n = at, nm_n = "at", min = 0, max = NULL, divisible_by = NULL)
-  at <- as.integer(at)
-  zero <- identical(at, 0L)
   check_age(x = data[[age_colnum]],
             complete = TRUE,
             unique = TRUE,
-            zero = zero,
+            zero = FALSE,
             open = TRUE)
-  check_at_in_age(at = at, age = data[[age_colnum]])
-  is_ge_at <- age_lower(data[[age_colnum]]) >= at
-  data <- data[is_ge_at, , drop = FALSE]
+  check_duplicated_age(data[[age_colnum]])
   ord <- order(age_lower(data[[age_colnum]]))
   data <- data[ord, , drop = FALSE]
+  n <- nrow(data)
   age <- data[[age_colnum]]
+  age_group_categ <- age_group_categ(age)
   has_sex <- length(sex_colnum) > 0L
   if (has_sex) {
     sex <- data[[sex_colnum]]
@@ -602,7 +648,6 @@ life_inner_one <- function(data,
     check_qx(qx = qx, nm_qx = "qx")
     qx <- as.matrix(qx)
   }
-  age_group_categ <- age_group_categ(age)
   check_number(x = radix,
                x_arg = "radix",
                check_na = TRUE,
@@ -612,6 +657,11 @@ life_inner_one <- function(data,
   if (!is.null(suffix))
     check_string(x = suffix, x_arg = "suffix")
   if (is_table) {
+    check_age(x = age,
+              complete = TRUE,
+              unique = TRUE,
+              zero = TRUE, ## checking for this
+              open = TRUE)
     if (has_mx) {
       ans <- mx_to_lifetab(mx = mx,
                            age_group_categ = age_group_categ,
@@ -640,19 +690,34 @@ life_inner_one <- function(data,
     ans <- tibble::as_tibble(ans)
     ans <- vctrs::vec_cbind(data, ans)
   }
-  else {
-    if (has_mx)
-      ans <- mx_to_ex(mx = mx,
-                      age_group_categ = age_group_categ,
-                      sex = sex,
-                      ax = ax,
-                      methods = methods)
-    else
-      ans <- qx_to_ex(qx = qx,
-                      age_group_categ = age_group_categ,
-                      sex = sex,
-                      ax = ax,
-                      methods = methods)
+  else { ## is lifeexp
+    check_at(at = at, age = age)
+    at <- as.integer(at)
+    zero <- identical(min(at), 0L)
+    check_age(x = age,
+              complete = TRUE,
+              unique = TRUE,
+              zero = zero, ## checking for this
+              open = TRUE)
+    n_at <- length(at)
+    ans <- vector(mode = "list", length = n_at)
+    for (i in seq_len(n_at)) {
+      at_i <- at[[i]]
+      is_ge_at_i <- age_lower(age) >= at_i
+      if (has_mx)
+        ans[[i]] <- mx_to_ex(mx = mx[is_ge_at_i, , drop = FALSE],
+                             age_group_categ = age_group_categ[is_ge_at_i],
+                             sex = sex[is_ge_at_i],
+                             ax = ax[is_ge_at_i],
+                             methods = methods)
+      else
+        ans[[i]] <- qx_to_ex(qx = qx[is_ge_at_i, , drop = FALSE],
+                             age_group_categ = age_group_categ[is_ge_at_i],
+                             sex = sex[is_ge_at_i],
+                             ax = ax[is_ge_at_i],
+                             methods = methods)
+    }
+    ans <- do.call(rbind, ans)
     has_draws <- ncol(ans) > 1L
     if (has_draws)
       ans <- rvec::rvec_dbl(ans)
@@ -661,6 +726,8 @@ life_inner_one <- function(data,
     ans <- tibble::tibble(ex = ans)
     if (!is.null(suffix))
       names(ans) <- paste(names(ans), suffix, sep = ".")
+    if (n_at > 1L)
+      ans <- vctrs::vec_cbind(tibble::tibble(at = at), ans)
   }
   ans
 }
@@ -765,3 +832,36 @@ qx_to_lifetab <- function(qx,
         names(ans) <- paste(names(ans), suffix, sep = ".")
     ans
 }
+
+## HAS_TESTS
+#' Remove Exisiting Life Table Columns
+#'
+#' Remove columns  "lx", "dx", "Lx", and "ex"
+#' from data frame 'data' (if they are present).
+#'
+#' @param data A data frame
+#' @param is_table Whether returning life table or life expectancy
+#' @param suffix Optional suffix added to new
+#' columns in result.
+#' 
+#' @returns A modified version of 'data'
+#'
+#' @noRd
+remove_existing_lifetab_cols <- function(data, is_table, suffix) {
+  if (is_table)
+    nms_lifetab_cols <- c("lx", "dx", "Lx", "ex")
+  else
+    nms_lifetab_cols <- "ex"
+  if (!is.null(suffix))
+    nms_lifetab_cols <- paste(nms_lifetab_cols, suffix, sep = ".")
+  nms_data <- names(data)
+  nms_both <- intersect(nms_lifetab_cols, nms_data)
+  if (length(nms_both) > 0L) {
+    cli::cli_alert_info("Overwriting existing column{?s} {.var {nms_both}} in {.arg data}.")
+    is_remove <- nms_data %in% nms_both
+    data <- data[!is_remove]
+  }
+  data
+}
+                      
+  

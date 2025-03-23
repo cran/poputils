@@ -18,7 +18,8 @@ lifetab(
   closed = c("constant", "linear"),
   open = "constant",
   radix = 1e+05,
-  suffix = NULL
+  suffix = NULL,
+  n_core = 1
 )
 
 lifeexp(
@@ -34,7 +35,8 @@ lifeexp(
   child = c("constant", "linear", "CD"),
   closed = c("constant", "linear"),
   open = "constant",
-  suffix = NULL
+  suffix = NULL,
+  n_core = 1
 )
 }
 \arguments{
@@ -102,8 +104,13 @@ Currently the only option is `"constant".}
 \item{suffix}{Optional suffix added to new
 columns in result.}
 
+\item{n_core}{Number of cores to use for parallel
+processing. If \code{n_core} is \code{1} (the default),
+no parallel processing is done.}
+
 \item{at}{Age at which life expectancy is calculated
-(\verb{lifeexp() only). Default is }0`.}
+(\verb{lifeexp() only). Default is }0`.
+Can be a vector with length > 1.}
 }
 \value{
 A \link[tibble:tibble]{tibble}.
@@ -230,6 +237,16 @@ through to the life table values, which will
 also be rvecs.
 }
 
+\section{Parallel processing}{
+
+
+Calculations can be slow when working
+with rvecs and many combinations of 'by' variables.
+In these cases, setting \code{n_core} to a number
+greater than 1, which triggers parallel processing,
+may help.
+}
+
 \examples{
 library(dplyr)
 
@@ -281,6 +298,13 @@ west_lifetab |>
   lifeexp(mx = mx,
           at = 60,
           sex = sex)
+
+## life expectancy at ages 0 and 60
+west_lifetab |>
+  filter(level == 10) |>
+  lifeexp(mx = mx,
+          at = c(0, 60),
+          sex = sex)
 }
 \references{
 \itemize{
@@ -303,5 +327,6 @@ levels of low mortality. \emph{Demographic Research},
 \itemize{
 \item \code{\link[=ex_to_lifetab_brass]{ex_to_lifetab_brass()}} Calculate life table from minimal inputs
 \item \code{\link[=q0_to_m0]{q0_to_m0()}} Convert between infant mortality measures
+\item \code{\link[=tfr]{tfr()}} Calculate total fertility rate
 }
 }

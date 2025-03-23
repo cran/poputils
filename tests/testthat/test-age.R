@@ -140,6 +140,15 @@ test_that("'check_age' works - 'open'", {
                  "Oldest age group is not open.")
 })
 
+test_that("'check_age' works - 'closed'", {
+    expect_true(check_age(c("0", "5-9", "1-4", "10-14"),
+                          closed = TRUE))
+    expect_error(check_age(c("1--4", "10+", "5--9"),
+                           closed = TRUE),
+                 "Oldest age group is not closed.")
+})
+
+
 
 ## combine_age ----------------------------------------------------------------
 
@@ -223,6 +232,12 @@ test_that("'combine_age' works with valid inputs - single to five", {
     ans_obtained <- combine_age(x, to = "five")
     ans_expected <- factor(c("30-34", "35-39"))
     expect_identical(ans_obtained, ans_expected)
+    x <- 12:53
+    ans_obtained <- combine_age(x, to = "five")
+    ans_expected <- c(rep("10-14", times = 3),
+                      rep(age_labels(type = "five", min = 15, max = 50), each = 5),
+                      rep("50-54", times = 4))
+    expect_identical(ans_obtained, ans_expected)                      
 })
 
 test_that("'combine_age' works with valid inputs - lt to five", {

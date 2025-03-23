@@ -262,9 +262,11 @@ age_group_type <- function(x) {
 #' - `unique`. Whether `x` has duplicated labels.
 #' - `zero`. Whether the youngest age group in `x` starts
 #'   at age 0, ie whether it includes `"0"` or `"0-4"`.
-#' - `open`. Whether the oldest age group in `x` has an "open"
-#'   age group, such as `"100+"` or `"65+"`, that has no
-#'   upper limit.
+#' - `open`. Whether the oldest age group in `x` is "open",
+#'   with no upper limit, eg `"100+"` or `"65+"`.
+#' - `closed`. Whether the oldest age group in `x`
+#'   is "closed", with an upper limit,
+#'   eg `"100-104+"` or `"65"`.
 #'
 #' @param x A vector of age labels.
 #' @param complete If `TRUE`,
@@ -277,6 +279,9 @@ age_group_type <- function(x) {
 #' @param open If `TRUE`,
 #' test whether oldest age group in `x`
 #' is open.
+#' @param closed If `TRUE`,
+#' test whether oldest age group in `x`
+#' is closed.
 #'
 #' @returns `TRUE`, invisibly, or raises an
 #' error if a test fails.
@@ -305,55 +310,71 @@ age_group_type <- function(x) {
 #'   check_age(c("10-14", "0-4", "5-9"),
 #'             open = TRUE)
 #' )
+#'
+#' try(
+#'   check_age(c("10+", "0-4", "5-9"),
+#'             closed = TRUE)
+#' )
 #' @export
 check_age <- function(x,
                       complete = FALSE,
                       unique = FALSE,
                       zero = FALSE,
-                      open = FALSE) {
-    check_flag(complete)
-    check_flag(unique)
-    check_flag(zero)
-    check_flag(open)
-    age <- reformat_age(x)
-    levels_age <- levels(age)
-    n_age <- length(levels_age)
-    age_limits <- age_limits(levels_age)
-    if (complete) {
-        is_present <- levels_age %in% age
-        i_missing <- match(FALSE, is_present, nomatch = 0L)
-        if (i_missing > 0L) {
-            age_missing <- levels_age[[i_missing]]
-            cli::cli_abort("Age group {.val {age_missing}} is missing.")
-        }
+                      open = FALSE,
+                      closed = FALSE) {
+  check_flag(complete)
+  check_flag(unique)
+  check_flag(zero)
+  check_flag(open)
+  check_flag(closed)
+  age <- reformat_age(x)
+  levels_age <- levels(age)
+  n_age <- length(levels_age)
+  age_limits <- age_limits(levels_age)
+  if (complete) {
+    is_present <- levels_age %in% age
+    i_missing <- match(FALSE, is_present, nomatch = 0L)
+    if (i_missing > 0L) {
+      age_missing <- levels_age[[i_missing]]
+      cli::cli_abort("Age group {.val {age_missing}} is missing.")
     }
-    if (unique) {
-        is_dup <- duplicated(x)
-        i_dup <- match(TRUE, is_dup, nomatch = 0L)
-        if (i_dup > 0L) {
-            x_dup <- x[[i_dup]]
-            cli::cli_abort("Age group {.val {x_dup}} is duplicated.")
-        }
+  }
+  if (unique) {
+    is_dup <- duplicated(x)
+    i_dup <- match(TRUE, is_dup, nomatch = 0L)
+    if (i_dup > 0L) {
+      x_dup <- x[[i_dup]]
+      cli::cli_abort("Age group {.val {x_dup}} is duplicated.")
     }
-    if (zero) {
-        lower <- age_limits$lower
-        if (lower[[1L]] != 0L) {
-            i_youngest <- match(levels_age[[1L]], age)
-            youngest <- x[[i_youngest]]
-            cli::cli_abort(c("Youngest age group does not start at 0.",
-                             i = "Youngest age group is {.val {youngest}}."))
-        }
+  }
+  if (zero) {
+    lower <- age_limits$lower
+    if (lower[[1L]] != 0L) {
+      i_youngest <- match(levels_age[[1L]], age)
+      youngest <- x[[i_youngest]]
+      cli::cli_abort(c("Youngest age group does not start at 0.",
+                       i = "Youngest age group is {.val {youngest}}."))
     }
-    if (open) {
-        upper <- age_limits$upper
-        if (is.finite(upper[[n_age]])) {
-            i_oldest <- match(levels_age[[n_age]], age)
-            oldest <- x[[i_oldest]]
-            cli::cli_abort(c("Oldest age group is not open.",
-                             i = "Oldest age group is {.val {oldest}}."))
-        }
+  }
+  if (open) {
+    upper <- age_limits$upper
+    if (is.finite(upper[[n_age]])) {
+      i_oldest <- match(levels_age[[n_age]], age)
+      oldest <- x[[i_oldest]]
+      cli::cli_abort(c("Oldest age group is not open.",
+                       i = "Oldest age group is {.val {oldest}}."))
     }
-    invisible(TRUE)
+  }
+  if (closed) {
+    upper <- age_limits$upper
+    if (is.infinite(upper[[n_age]])) {
+      i_oldest <- match(levels_age[[n_age]], age)
+      oldest <- x[[i_oldest]]
+      cli::cli_abort(c("Oldest age group is not closed.",
+                       i = "Oldest age group is {.val {oldest}}."))
+    }
+  }
+  invisible(TRUE)
 }
 
 
@@ -438,8 +459,9 @@ combine_age <- function(x, to = c("five", "lt")) {
   ## make new lower bounds
   lower_min_old <- min(lower_old, na.rm = TRUE)
   lower_max_old <- max(lower_old, na.rm = TRUE)
+  lower_min_new <- (lower_min_old %/% 5L) * 5L
   if (to == "five") {
-    lower_new <- seq.int(from = lower_min_old,
+    lower_new <- seq.int(from = lower_min_new,
                          to = lower_max_old,
                          by = 5L)
   }
@@ -466,7 +488,6 @@ combine_age <- function(x, to = c("five", "lt")) {
       }
     }
     else {
-      lower_min_new <- (lower_min_old %/% 5L) * 5L
       lower_new <- seq.int(from = lower_min_new,
                            to = lower_max_old,
                            by = 5L)

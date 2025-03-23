@@ -1,19 +1,30 @@
 
 ## HAS_TESTS
-#' Check that 'at' Picks Out the Lower Limit of Age Group in 'age'
+#' Check that 'at' Argument to 'lifeexp' Valid
 #'
-#' @param at An integer scalar
+#' @param at A numeric vector with length > 0 and no NAs
 #' @param age A vector of age labels
 #'
 #' @returns TRUE, invisibly
 #'
 #' @noRd
-check_at_in_age <- function(at, age) {
+check_at <- function(at, age) {
+  if (!is.numeric(at))
+    cli::cli_abort(c("{.arg at} is non-numeric.",
+                     i = "{.arg at} has class {.cls {class(at)}}."))
+  if (identical(length(at), 0L))
+    cli::cli_abort("{.arg at} has length 0.")
+  n_na <- sum(is.na(at))
+  if (n_na > 0L)
+    cli::cli_abort("{.arg at} has {cli::qty(n_na)} NA{?s}.")
+  at <- as.integer(at)
   lower <- age_lower(age)
-  if (!(at %in% lower))
+  is_in_lower <- at %in% lower
+  i_not_in_lower <- match(FALSE, is_in_lower, nomatch = 0L)
+  if (i_not_in_lower > 0L)
     cli::cli_abort(c("Invalid value for {.arg at}.",
-                     i = "{.arg at} must equal the lower limit of an age group in {.arg age}.",
-                     i = "{.arg at}: {.val {at}}.",
+                     i = "{.arg at} must equal lower limits of age groups in {.arg age}.",
+                     i = "Invalid value: {.val {at[[i_not_in_lower]]}}.",
                      i = "Age groups in {.arg age}: {.val {age}}.",
                      i = "Lower limits of age groups: {.val {lower}}."))
   invisible(TRUE)
@@ -229,34 +240,42 @@ check_life_colnums <- function(mx_colnum,
                                ax_colnum,
                                by_colnums,
                                groups_colnums) {
-    has_mx <- length(mx_colnum) > 0L
-    has_qx <- length(qx_colnum) > 0L
-    has_age <- length(age_colnum) > 0L
-    has_sex <- length(sex_colnum) > 0L
-    has_by <- length(by_colnums) > 0L
-    has_groups <- length(groups_colnums) > 0L
-    if (!has_mx && !has_qx)
-        cli::cli_abort("No value supplied for {.arg mx} or for {.arg qx}.")
-    if (has_mx && has_qx)
-        cli::cli_abort("Values supplied for {.arg mx} and for {.arg qx}.")
-    if (!has_age)
-        cli::cli_abort("No value supplied for {.arg age}.")
-    if (has_by && has_groups)
-        cli::cli_abort("Can't supply {.arg by} when {.arg data} is a grouped data
+  has_mx <- length(mx_colnum) > 0L
+  has_qx <- length(qx_colnum) > 0L
+  has_age <- length(age_colnum) > 0L
+  has_sex <- length(sex_colnum) > 0L
+  has_by <- length(by_colnums) > 0L
+  has_groups <- length(groups_colnums) > 0L
+  if (!has_mx && !has_qx)
+    cli::cli_abort("No value supplied for {.arg mx} or for {.arg qx}.")
+  if (has_mx && has_qx)
+    cli::cli_abort("Values supplied for {.arg mx} and for {.arg qx}.")
+  if (!has_age)
+    cli::cli_abort("No value supplied for {.arg age}.")
+  if (has_by && has_groups)
+    cli::cli_abort("Can't supply {.arg by} when {.arg data} is a grouped data
   frame.")
-    at_most_one <- list(mx = mx_colnum,
-                        qx = qx_colnum,
-                        age = age_colnum,
-                        sex = sex_colnum,
-                        ax = ax_colnum)
-    check_at_most_one_colnum(at_most_one)
-    no_overlap <- list(mx = mx_colnum,
-                       qx = qx_colnum,
-                       age = age_colnum,
-                       sex = sex_colnum,
-                       ax = ax_colnum)
-    check_no_overlap_colnums(no_overlap)
-    invisible(TRUE)
+  at_most_one <- list(mx = mx_colnum,
+                      qx = qx_colnum,
+                      age = age_colnum,
+                      sex = sex_colnum,
+                      ax = ax_colnum)
+  check_at_most_one_colnum(at_most_one)
+  ## 'sex' is allowed to overlap with 'by' and 'groups'
+  no_overlap_nosex <- list(mx = mx_colnum,
+                           qx = qx_colnum,
+                           age = age_colnum,
+                           ax = ax_colnum,
+                           by = by_colnums,
+                           groups = groups_colnums)
+  check_no_overlap_colnums(no_overlap_nosex)
+  no_overlap_withsex <- list(mx = mx_colnum,
+                             qx = qx_colnum,
+                             age = age_colnum,
+                             sex = sex_colnum,
+                             ax = ax_colnum)
+  check_no_overlap_colnums(no_overlap_withsex)
+  invisible(TRUE)
 }
 
 
@@ -724,7 +743,6 @@ check_standard <- function(standard) {
 }
 
 
-
 ## HAS_TESTS
 #' Check that input is character, of length 1,
 #' non-NA, at least one char,
@@ -802,6 +820,50 @@ check_target_ex_to_lifetab_brass <- function(target) {
                           nm_x = "target",
                           nms_cols = nms_cols)
     invisible(TRUE)
+}
+
+
+## HAS_TESTS
+#' Check that no columns of 'data' are used more than once,
+#' and that required arguments are supplied
+#'
+#' @param asfr_colnum Named integer vector
+#' @param age_colnum Named integer vector
+#' @param sex_colnum Named integer vector
+#' @param by_colnums Named integer vector
+#' @param groups_colnums Named integer vector
+#'
+#' @returns TRUE, invisibly
+#'
+#' @noRd        
+check_tfr_colnums <- function(asfr_colnum,
+                              age_colnum,
+                              sex_colnum,
+                              by_colnums,
+                              groups_colnums) {
+  has_asfr <- length(asfr_colnum) > 0L
+  has_age <- length(age_colnum) > 0L
+  has_sex <- length(sex_colnum) > 0L
+  has_by <- length(by_colnums) > 0L
+  has_groups <- length(groups_colnums) > 0L
+  if (!has_asfr)
+    cli::cli_abort("No value supplied for {.arg asfr}.")
+  if (!has_age)
+    cli::cli_abort("No value supplied for {.arg age}.")
+  if (has_by && has_groups)
+    cli::cli_abort("Can't supply {.arg by} when {.arg data} is a grouped data
+  frame.")
+  at_most_one <- list(asfr = asfr_colnum,
+                      age = age_colnum,
+                      sex = sex_colnum)
+  check_at_most_one_colnum(at_most_one)
+  no_overlap <- list(asfr = asfr_colnum,
+                     age = age_colnum,
+                     sex = sex_colnum,
+                     by = by_colnums,
+                     groups = groups_colnums)
+  check_no_overlap_colnums(no_overlap)
+  invisible(TRUE)
 }
 
 

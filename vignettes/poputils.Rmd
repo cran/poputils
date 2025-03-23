@@ -25,13 +25,13 @@ knitr::opts_chunk$set(
 
 # Aims
 
-**poputils** contains tools for carrying out common tasks when working with demographic data.  Some distinctive features:
+**poputils** provides tools for common tasks with demographic data. It has some distinctive features:
 
-- **poputils** tries to into [tidyverse](https://www.tidyverse.org) workflows. For instance, **poputils** functions use data frames for inputs and outputs, use [tidyselect](https://tidyselect.r-lib.org/reference/language.html) methods to specify variables, and follow tidyverse conventions for variable names.
-- **poputils** allows for uncertainty through the use of [rvecs](https://bayesiandemography.github.io/rvec/reference/rvec.html). An rvec is an object holding multiple draws from a distribution that behaves similarly to an ordinary R vector.
-- Allow users to work directly with age and time labels, based on common set of methods.
+- *Tidyverse compliance*. **poputils** tries to into [tidyverse](https://www.tidyverse.org) workflows. For instance, **poputils** functions use data frames for inputs and outputs, use [tidyselect](https://tidyselect.r-lib.org/reference/language.html) methods to specify variables, and follow tidyverse conventions for variable names.
+- *Uncertainty*. **poputils** handles uncertainty through the use of [rvecs](https://bayesiandemography.github.io/rvec/reference/rvec.html). An rvec is an object holding multiple draws from a distribution that behaves similarly to an ordinary R vector.
+- *Age and time labels*. **poputils** allows users to work directly with age and time labels, based on common set of methods.
 
-Some functions in **poputils** are designed for data analysts working on demographic datasets. Others are designed for programmers creating functions to be used at data analysts.
+Some functions in **poputils** are designed for data analysts. Others are designed for programmers creating functions to be used by data analysts.
 
 
 # Tools for data analysts
@@ -40,11 +40,11 @@ Some functions in **poputils** are designed for data analysts working on demogra
 
 ### Age
 
-Producers of demographic data follow a wide variety of styles for labeling age groups. **poputils** contains tools for parsing and manipulating age group labels. 
+Producers of demographic data follow a wide variety of styles for labeling age groups. **poputils** contains tools for parsing and manipulating these labels. 
 
 Age label functions in **poputils** require that age labels belong to one of three types:
 
-- `"single"`. Single years of age, possibly including an open age group, eg `"0", `"81"`, `"17"`, `"100+"`. 
+- `"single"`. Single years of age, possibly including an open age group, eg `"0"`, `"81"`, `"17"`, `"100+"`. 
 - `"five"`. Five-year age groups, possibly including an open age group, eg `"0-4"`, `"80-84"`, `"15-19"`, `"100+"`.
 - `"lt"`. Life table age groups. Like `"five"`, but with the `"0-4"` age group split into `"0"` and `"1-4"`.
 
@@ -83,7 +83,6 @@ tibble(age = age_labels("lt", max = 30),
        age_25plus = set_age_open(age, lower = 20))
 ```
 
-The aim is that users should be able to with age group labels throughout the analysis.
 
 ### Sex/gender
 
@@ -95,7 +94,7 @@ reformat_sex(c("M", "F", "Diverse", "Fem"), except = "Diverse")
 
 ## Life tables and life expectancy
 
-A life table a way of summarizing mortality conditions. It consists of quantities calculated from age-specific mortality rates. The most widely-used life table quantity is life expectancy at birth.
+A life table a way of describing mortality. The best known life table quantity is life expectancy at birth.
 
 ### Basic functionality
 
@@ -133,7 +132,7 @@ By default, `lifeexp()` calculates life expectancy at age zero. It can, however,
 ```{r}
 nzmort |>
   lifeexp(mx = mx,
-          at = 65,
+          at = c(0, 65),
           by = c(gender, year))  
 ```
 
@@ -141,7 +140,7 @@ nzmort |>
 
 ### Calculation methods
 
-Alternative methods for calculating life tables differ mainly in their assumptions variation within age groups [@preston2001demography; @keyfitz2005applied]. It turns out that, for the purposes of constructing life tables, all the relevant information about the way that mortality varies by age within each age group can be captured by a single number: the average length of time lived in an interval by people who die in that interval [@preston2001demography, p.43]. This number is denoted $_na_x$, where $x$ is exact age at the start of the internal, and $n$ is the length of the interval. The quantity $_5a_{20}$, for instance, refers to the average number of years lived after their 20th birthday by people who die between their 20th and 25th birthdays. When $n=1$, the $n$ subscript is typically omitted.
+Alternative methods for calculating life tables differ mainly in their assumptions about how mortality varies within age groups [@preston2001demography; @keyfitz2005applied]. It turns out that, for the purposes of constructing life tables, all the relevant information about the way that mortality varies within age groups can be captured by a single number: the average length of time lived in an interval by people who die in that interval [@preston2001demography, p.43]. This number is denoted $_na_x$, where $x$ is exact age at the start of the internal, and $n$ is the length of the interval. The quantity $_5a_{20}$, for instance, refers to the average number of years lived after their 20th birthday by people who die between their 20th and 25th birthdays. When $n=1$, the $n$ subscript is typically omitted.
 
 Functions `lifetab()` and `lifeexp()` have four arguments for specifying calculation methods: 
 
@@ -181,9 +180,13 @@ Different choices of method are available for each argument. In some cases, diff
 | `open`     | \<any\>  | `"constant"`   | `mx`  | $$_{\infty}a_{\omega} = \frac{1}{_{\infty}m_{\omega}}$$                                                                                                            |
 | `open`     | \<any\>  | `"constant"`   | `qx`  | $$_{\infty}a_{\omega} = \frac{1}{_{n}m_{\omega-n}}$$                                                                                                               |
 
-In the table above, the values for `"CD"` are from @coale1983regional, p20, and @preston2001demography, p48; the values for `"AK"` are from @andreev2015average, p376, and @wilmoth2021methods, p37; and the values for `"constant"` are expected values for an exponential distribution that has been right-truncated at $n$.
+In the table above,
 
-When the inputs data are $_nq_x$, the value of $_na_x$ for the last age group is based in mortality rates in the second-to-last age group. This is an expedient to deal with the fact that $_nq_x$ is always 1 in the last age group, and therefore provides no information about mortality conditions in that age group.
+- values for `"CD"` are from @coale1983regional, p20, and @preston2001demography, p48;
+- values for `"AK"` are from @andreev2015average, p376, and @wilmoth2021methods, p37; and
+- values for `"constant"` are expected values for an exponential distribution that has been right-truncated at $n$.
+
+When the inputs data are $_nq_x$, the value of $_na_x$ for the last age group is based in mortality rates in the second-to-last age group. This is an expedient to deal with the fact that $_nq_x$ is always 1 in the last age group, and therefore provides no information about mortality in that age group.
 
 Once the $_na_x$ have been determined, the life table is fully specified, and the required calculations can be carried out with no further input from the user.
 
@@ -203,7 +206,7 @@ $$_nL_x = l_{x+n} \times n + {_nd_x} \times {_na_x}.$$
 Finally, $e_x$, the number of years of life remaining to a person aged exactly $x$, is 
 $$e_x = {_nL_x} + {_nL_{x+n}} + \cdots + {_{\infty}L_{\omega}}$$.
 
-Although the results for `lifetab()` and `lifeexp()` do vary with difference choices for `infant`, `child`, or `closed`, the differences are often small,
+Although the results for `lifetab()` and `lifeexp()` do vary with the values for `infant`, `child`, or `closed`, the differences are typically small, 
 ```{r}
 lin <- nzmort |>
   lifeexp(mx = mx,
@@ -220,15 +223,37 @@ inner_join(lin, ak, by = c("year", "gender")) |>
   mutate(diff = ex.lin - ex.ak)
 ```
 
-### Uncertainty
+### Deriving life tables from life expectancies
 
-The examples of life tables and life expectancy so far have all been based on a deterministic input, `mx` column of data frame `nzmort`,
+When working with very limited data, or when constructing simulations, it is sometimes helpful to be able to derive a full life table that is consistent with a given life expectancy. This is what function `ex_to_lifetab_brass()` does:
 
 ```{r}
-nzmort
+target_ex <- data.frame(sex = "Female", ex = 51.4)
+
+west10 <- west_lifetab |>
+  filter(level == 10) |>
+  select(age, sex, lx)
+
+ex_to_lifetab_brass(target = target_ex,
+                    standard = west10)
 ```
 
-The data frame `nzmort_rvec` instead uses a rvec to represent mortality rates,
+
+## Fertility
+
+Function `tfr()` calculates total fertility rates from age-specific fertility rates. The interface is similar to that of `lifeexp()`,
+
+```{r}
+iran_fertility |>
+  tfr(asfr = rate,
+      by = c(area, time),
+      denominator = 1000)      
+```
+
+
+## Uncertainty
+
+The examples so far have all used deterministic inputs. The data frame `nzmort_rvec`, in constrast, uses a rvec to represent mortality rates,
 
 ```{r}
 library(rvec)
@@ -237,7 +262,7 @@ nzmort_rvec
 
 The `mx` rvec holds 1000 draws from the posterior distribution from a Bayesian model of mortality. The posterior distribution for infant mortality for females in 2021, for instance, has a posterior median of 0.0032, and a 95% credible interval of (0.0028, 0.0037).
 
-If the input to `lifetab()` or `lifeexp()` is an rvec, then the output will be too. Uncertainty about mortality rates is propagated through to quantities derived from these rates.
+If the input to `lifetab()`, `lifeexp()`, or `tfr()` is an rvec, then the output will be too. Uncertainty in the input is propagated through to the output.
 
 ```{r}
 library(rvec)
@@ -251,7 +276,7 @@ nzmort_rvec |>
 
 # Tools for developers
 
-**poputils** provides some functions that developers creating packages to be used by demographers may find useful. 
+**poputils** provides functions that developers creating packages to be used by demographers may find useful. 
 
 ## Labels
 
@@ -271,11 +296,11 @@ Function `groups_colnums()` is helpful when implementing [tidyselect](https://ti
 
 ## Definite
 
-- **Stable populations**. Given mortality and fertility profiles, generate the associated stable population.
+- **Input checking** Sanity checks, and repairs, for inputs - eg ensuring that exposure is greater than 0 if deaths greater than 0.
+- **Stable populations** Given mortality and fertility profiles, generate the associated stable population.
 - **Time labels** Functions for dealing with time labels analogous to the existing ones dealing with age labels. The functions need to allow for one-month and one-quarter periods, and for 'exact times', ie dates.
 - **Multiple decrement life tables** Extend `lifetab()` and `lifeexp()` to allow for multiple decrements.
 - **Projection accounting** Functions to turn projected demographic rates, and an initial population, into a projected demographic account. Needs flexibility over dimensions included, and needs deterministic and probabilistic versions.
-- **TFR** Function to calculation total fertility rates from age-specific fertility rates
 - **Age, period, cohort labels** Functions to allocate events to age groups, periods, or cohorts, based on data on dates of event and dates of birth.
 
 

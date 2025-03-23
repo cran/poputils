@@ -54,7 +54,7 @@ west_lifetab |>
 ## -----------------------------------------------------------------------------
 nzmort |>
   lifeexp(mx = mx,
-          at = 65,
+          at = c(0, 65),
           by = c(gender, year))  
 
 ## -----------------------------------------------------------------------------
@@ -73,7 +73,20 @@ inner_join(lin, ak, by = c("year", "gender")) |>
   mutate(diff = ex.lin - ex.ak)
 
 ## -----------------------------------------------------------------------------
-nzmort
+target_ex <- data.frame(sex = "Female", ex = 51.4)
+
+west10 <- west_lifetab |>
+  filter(level == 10) |>
+  select(age, sex, lx)
+
+ex_to_lifetab_brass(target = target_ex,
+                    standard = west10)
+
+## -----------------------------------------------------------------------------
+iran_fertility |>
+  tfr(asfr = rate,
+      by = c(area, time),
+      denominator = 1000)      
 
 ## -----------------------------------------------------------------------------
 library(rvec)
