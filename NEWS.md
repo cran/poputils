@@ -1,4 +1,10 @@
 
+# poputils 0.4.1
+
+* Modify C++ function `qx_to_ex()` to avoid possible memory leekage
+  found by valgrind.
+  
+
 # poputils 0.4.0
 
 ## Interface
