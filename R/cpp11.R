@@ -51,3 +51,7 @@ logit_inner <- function(p) {
 invlogit_inner <- function(x) {
   .Call(`_poputils_invlogit_inner`, x)
 }
+
+rr3_inner <- function(x, is_rvec) {
+  .Call(`_poputils_rr3_inner`, x, is_rvec)
+}

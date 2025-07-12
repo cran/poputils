@@ -103,7 +103,7 @@ test_that("'lifetab' works with n_core = 2", {
                    sex = gender,
                    by = region,
                    n_core = 2)
-  expect_identical(ans_1, ans_2)
+  expect_equal(ans_1, ans_2)
 })
 
 
@@ -154,7 +154,7 @@ test_that("'lifetab' works with valid inputs, with n_core = 2", {
                    infant = "AK",
                    child = "CD",
                    n_core = 2)
-    expect_identical(ans1, ans2)
+    expect_equal(ans1, ans2)
 })
 
 test_that("'lifeexp' works with at = 5", {

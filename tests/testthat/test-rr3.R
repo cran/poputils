@@ -27,9 +27,21 @@ test_that("rr3 throws correct error with non-integer", {
                "`x` has non-integer values.")
 })
 
+test_that("rr3 throws correct error with non-finite", {
+  expect_error(rr3(c(1, 2, Inf, -3)),
+               "`x` has non-finite values.")
+})
+
+test_that("rr3 throws correct error with non-numeric", {
+  expect_error(rr3(c("a", 2, 1.1)),
+               "`x` must be numeric or integer.")
+  expect_error(rr3(rvec::rvec(matrix("a", nr = 1))),
+               "`x` must be numeric or integer.")
+})
+
 test_that("rr3 throws correct error with value too large", {
   expect_error(rr3(c(1, 2, .Machine$integer.max + 1)),
-               "Maximum value in `x` greater than largest integer that can be represented on this machine.")
+               "Maximum value in `x` greater than largest representable integer.")
 })
 
 test_that("rr3 works with rvec", {

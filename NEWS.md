@@ -1,4 +1,13 @@
 
+# poputils 0.4.2
+
+## Interface
+
+* Modify function `rr3` to use C code. (#30)
+* Modified tests for upcoming changes to package `rvec` (where random
+  variant functions for discrete distributions will always return
+  doubles).
+
 # poputils 0.4.1
 
 * Modify C++ function `qx_to_ex()` to avoid possible memory leekage

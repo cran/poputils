@@ -96,6 +96,13 @@ extern "C" SEXP _poputils_invlogit_inner(SEXP x) {
     return cpp11::as_sexp(invlogit_inner(cpp11::as_cpp<cpp11::decay_t<doubles>>(x)));
   END_CPP11
 }
+// rr3.cpp
+writable::integers rr3_inner(integers x, bool is_rvec);
+extern "C" SEXP _poputils_rr3_inner(SEXP x, SEXP is_rvec) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(rr3_inner(cpp11::as_cpp<cpp11::decay_t<integers>>(x), cpp11::as_cpp<cpp11::decay_t<bool>>(is_rvec)));
+  END_CPP11
+}
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
@@ -112,6 +119,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_poputils_qx_to_Lx",       (DL_FUNC) &_poputils_qx_to_Lx,       5},
     {"_poputils_qx_to_ex",       (DL_FUNC) &_poputils_qx_to_ex,       5},
     {"_poputils_qx_to_lx",       (DL_FUNC) &_poputils_qx_to_lx,       1},
+    {"_poputils_rr3_inner",      (DL_FUNC) &_poputils_rr3_inner,      2},
     {NULL, NULL, 0}
 };
 }

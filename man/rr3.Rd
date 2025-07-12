@@ -17,7 +17,7 @@ A randomly-rounded version of \code{x}.
 \description{
 Apply the 'Random Round to Base 3' (RR3)
 algorithm to a vector of integers
-(or doubles where \code{round(x) == x}.
+(or doubles where \code{round(x) == x}.)
 }
 \details{
 The RR3 algorithm is used by statistical
